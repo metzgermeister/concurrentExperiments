@@ -36,6 +36,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     }
 
     @Override
+    //TODO test somehow that resource moved to acquired list
     public R acquire() {
         R result;
 
@@ -48,10 +49,11 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
                     availableResourceIsPresent.await();
                 } catch (InterruptedException e) {
                     logger.error("was interrupted");
-                    throw new IllegalUsageError("resuming due to improper usage");
+                    throw new IllegalUsageException("resuming due to improper usage");
                 }
             }
             result = availableResources.poll();
+            acquiredResources.add(result);
 
         } finally {
             lock.unlock();

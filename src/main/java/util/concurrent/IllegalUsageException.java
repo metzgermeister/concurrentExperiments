@@ -1,10 +1,10 @@
 package util.concurrent;
 
-public class IllegalUsageError extends RuntimeException {
+public class IllegalUsageException extends RuntimeException {
 
     private static final long serialVersionUID = 4562573109458049508L;
 
-    public IllegalUsageError(String s) {
+    public IllegalUsageException(String s) {
         super(s);
     }
 }
