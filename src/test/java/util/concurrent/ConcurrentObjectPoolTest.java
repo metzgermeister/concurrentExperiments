@@ -6,10 +6,7 @@ import org.junit.Test;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class ConcurrentObjectPoolTest {
 
@@ -121,5 +118,30 @@ public class ConcurrentObjectPoolTest {
 
         pool.add("Some resource");
         assertFalse(pool.remove("unknown resource"));
+    }
+
+
+    @Test
+    public void shouldReleaseResource() throws Exception {
+        pool.open();
+
+        String resource = "resource";
+        pool.add(resource);
+
+        String acquired = pool.acquire();
+        assertEquals(resource, acquired);
+
+        pool.release(acquired);
+
+        String acquiredAgain = pool.acquire();
+        assertEquals(resource, acquiredAgain);
+
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotReleaseUnknownResource() throws Exception {
+        pool.open();
+
+        pool.release("unknown resource");
     }
 }

@@ -13,7 +13,8 @@ public interface ObjectPool<R> {
 
     R acquire(long timeout, TimeUnit timeUnit);
 
-    //    void release(R resource);
+    void release(R resource);
+
     boolean add(R resource);
 
     boolean remove(R resource);

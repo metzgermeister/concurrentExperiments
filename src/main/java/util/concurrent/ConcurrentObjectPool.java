@@ -13,10 +13,10 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     Logger logger = Logger.getLogger(ConcurrentObjectPool.class);
 
-    private final Lock lock = new ReentrantLock();
+    private final Lock availableResourcesLock = new ReentrantLock();
 
     //TODO availableResourceIsPresent should be signalled
-    private final Condition availableResourceIsPresent = lock.newCondition();
+    private final Condition availableResourceIsPresent = availableResourcesLock.newCondition();
 
     private volatile boolean isOpen;
 
@@ -41,7 +41,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         R result;
 
         verifyIsOpen();
-        lock.lock();
+        availableResourcesLock.lock();
 
         try {
             while (availableResources.isEmpty()) {
@@ -56,7 +56,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
             acquiredResources.add(result);
 
         } finally {
-            lock.unlock();
+            availableResourcesLock.unlock();
         }
 
         return result;
@@ -74,15 +74,24 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     }
 
     @Override
+    public void release(R resource) {
+        boolean removed = acquiredResources.remove(resource);
+        Preconditions.checkArgument(removed, "attempted to release unknown or not acquired resource");
+
+        add(resource);
+
+    }
+
+    @Override
     public boolean add(R resource) {
-        lock.lock();
+        availableResourcesLock.lock();
         boolean result;
 
         try {
             result = availableResources.add(resource);
             availableResourceIsPresent.signal();
         } finally {
-            lock.unlock();
+            availableResourcesLock.unlock();
         }
 
         return result;
