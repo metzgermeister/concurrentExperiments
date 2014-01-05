@@ -17,7 +17,6 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     private final Lock availableResourcesLock = new ReentrantLock();
 
-    //TODO availableResourceIsPresent should be signalled
     private final Condition availableResourceIsPresent = availableResourcesLock.newCondition();
 
     private volatile boolean isOpen;
@@ -38,7 +37,6 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     }
 
     @Override
-    //TODO test somehow that resource moved to acquired list
     public R acquire() {
         R result;
 
