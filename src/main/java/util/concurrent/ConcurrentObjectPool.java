@@ -9,7 +9,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public final class ConcurrentObjectPool<R> implements ObjectPool {
+public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     Logger logger = Logger.getLogger(ConcurrentObjectPool.class);
 
@@ -57,7 +57,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool {
             lock.unlock();
         }
 
-        return result;  //To change body of implemented methods use File | Settings | File Templates.
+        return result;
     }
 
     private void verifyIsOpen() {
@@ -67,7 +67,23 @@ public final class ConcurrentObjectPool<R> implements ObjectPool {
     @Override
     public R acquire(long timeout, TimeUnit timeUnit) {
         verifyIsOpen();
+        //TODO implement
         return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public boolean add(R resource) {
+        lock.lock();
+        boolean result;
+
+        try {
+            result = availableResources.add(resource);
+            availableResourceIsPresent.signal();
+        } finally {
+            lock.unlock();
+        }
+
+        return result;
     }
 
 }

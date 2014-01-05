@@ -4,9 +4,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class ConcurrentObjectPoolTest {
@@ -42,6 +44,36 @@ public class ConcurrentObjectPoolTest {
 
 
     @Test
+    public void shouldWakeUpBlockedConsumerByAddingResource() throws Exception {
+        pool.open();
+
+        final AtomicBoolean finallyAcquired = new AtomicBoolean(false);
+        final String theOnlyResource = "TheOnlyResource";
+
+        Thread consumer = new Thread() {
+            public void run() {
+                String acquired = pool.acquire();
+                finallyAcquired.set(theOnlyResource.equals(acquired));
+            }
+        };
+
+
+        try {
+            consumer.start();
+            Thread.sleep(LOCKUP_DETECT_TIMEOUT);
+
+            pool.add(theOnlyResource);
+            consumer.join(LOCKUP_DETECT_TIMEOUT);
+
+            assertFalse("consumer should already acquire added resource", consumer.isAlive());
+        } catch (Exception unexpected) {
+            fail("something went wrong");
+        }
+
+        assertTrue("consumer haven't acquired resource", finallyAcquired.get());
+    }
+
+    @Test
     public void consumerShouldBeBlockedIfResourcesAreNotPresent() {
         pool.open();
 
@@ -62,9 +94,15 @@ public class ConcurrentObjectPoolTest {
         }
     }
 
-    @Test
-    public void shouldAcquireResource() throws Exception {
-//        pool.
+    @Test(timeout = LOCKUP_DETECT_TIMEOUT / 10)
+    public void shouldAddAndAcquireResource() throws Exception {
+        pool.open();
+
+        String resource = "Resource";
+        pool.add(resource);
+
+        String acquired = pool.acquire();
+        assertSame(acquired, resource);
 
     }
 }
