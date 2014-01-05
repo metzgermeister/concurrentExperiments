@@ -7,14 +7,16 @@ import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ConcurrentObjectPoolTest {
 
-    private ConcurrentObjectPool pool;
+    private static final long LOCKUP_DETECT_TIMEOUT = 1000L;
+    private ConcurrentObjectPool<String> pool;
 
     @Before
     public void setUp() throws Exception {
-        pool = new ConcurrentObjectPool();
+        pool = new ConcurrentObjectPool<String>();
     }
 
     @Test
@@ -36,5 +38,33 @@ public class ConcurrentObjectPoolTest {
     @Test(expected = IllegalStateException.class)
     public void shouldNotAcquireWithTimeoutFromClosedPool() throws Exception {
         pool.acquire(42, TimeUnit.NANOSECONDS);
+    }
+
+
+    @Test
+    public void consumerShouldBeBlockedIfResourcesAreNotPresent() {
+        pool.open();
+
+        Thread consumer = new Thread() {
+            public void run() {
+                pool.acquire();
+            }
+        };
+
+        try {
+            consumer.start();
+            Thread.sleep(LOCKUP_DETECT_TIMEOUT);
+            consumer.interrupt();
+            consumer.join(LOCKUP_DETECT_TIMEOUT);
+            assertFalse("consumer thread should be terminated", consumer.isAlive());
+        } catch (Exception unexpected) {
+            fail("something went wrong");
+        }
+    }
+
+    @Test
+    public void shouldAcquireResource() throws Exception {
+//        pool.
+
     }
 }
