@@ -2,6 +2,8 @@ package util.concurrent;
 
 import com.google.common.base.Preconditions;
 import org.apache.log4j.Logger;
+import util.concurrent.exception.IllegalUsageException;
+import util.concurrent.exception.ResourceNotAvailableException;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -48,8 +50,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
                 try {
                     availableResourceIsPresent.await();
                 } catch (InterruptedException e) {
-                    logger.error("was interrupted");
-                    throw new IllegalUsageException("resuming due to improper usage");
+                    onInterruptedException();
                 }
             }
             result = availableResources.poll();
@@ -66,12 +67,41 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         Preconditions.checkState(isOpen, "pool must be open to acquire resource");
     }
 
+    private void onInterruptedException() {
+        logger.error("exiting acquire by interrupted exception");
+        throw new IllegalUsageException("resuming due to improper usage");
+    }
+
     @Override
     public R acquire(long timeout, TimeUnit timeUnit) {
+        R result;
         verifyIsOpen();
-        //TODO implement
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+
+        boolean stillWaiting = true;
+        availableResourcesLock.lock();
+
+        try {
+            while (availableResources.isEmpty()) {
+                try {
+                    if (!stillWaiting) {
+                        logger.debug("exiting acquire by timeout");
+                        throw new ResourceNotAvailableException("Resource is unavailable");
+                    }
+                    stillWaiting = availableResourceIsPresent.await(timeout, timeUnit);
+                } catch (InterruptedException e) {
+                    onInterruptedException();
+                }
+            }
+            result = availableResources.poll();
+            acquiredResources.add(result);
+
+        } finally {
+            availableResourcesLock.unlock();
+        }
+
+        return result;
     }
+
 
     @Override
     public void release(R resource) {
@@ -83,6 +113,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     }
 
     @Override
+    //TODO add mass test - 20 consumers and 1 producer
     public boolean add(R resource) {
         availableResourcesLock.lock();
         boolean result;

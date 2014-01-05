@@ -1,7 +1,9 @@
 package util.concurrent;
 
+import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
 import org.junit.Test;
+import util.concurrent.exception.ResourceNotAvailableException;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -13,10 +15,16 @@ public class ConcurrentObjectPoolTest {
     private static final long LOCKUP_DETECT_TIMEOUT = 1000L;
     private ConcurrentObjectPool<String> pool;
 
+
+    static {
+        BasicConfigurator.configure();
+    }
+
     @Before
     public void setUp() throws Exception {
         pool = new ConcurrentObjectPool<String>();
     }
+
 
     @Test
     public void shouldBeInitiallyClosed() throws Exception {
@@ -122,7 +130,7 @@ public class ConcurrentObjectPoolTest {
 
 
     @Test
-    public void shouldReleaseResource() throws Exception {
+    public void shouldAcquireAndReleaseResource() throws Exception {
         pool.open();
 
         String resource = "resource";
@@ -143,5 +151,49 @@ public class ConcurrentObjectPoolTest {
         pool.open();
 
         pool.release("unknown resource");
+    }
+
+    @Test(expected = ResourceNotAvailableException.class, timeout = LOCKUP_DETECT_TIMEOUT)
+    public void shouldThrowExceptionOnAcquiringAfterTimeout() throws Exception {
+        pool.open();
+        pool.acquire(LOCKUP_DETECT_TIMEOUT / 10, TimeUnit.MILLISECONDS);
+    }
+
+    @Test
+    public void shouldAcquireWithTimeout() throws Exception {
+        pool.open();
+        String resource = "resource";
+        pool.add(resource);
+
+        int irrelevant = 7;
+        assertEquals(resource, pool.acquire(irrelevant, TimeUnit.SECONDS));
+    }
+
+    @Test(timeout = LOCKUP_DETECT_TIMEOUT * 5)
+    public void shouldAcquireAfterResourceWasReleased() throws Exception {
+        pool.open();
+        String singleResource = "SingleResource";
+        pool.add(singleResource);
+        String acquired = pool.acquire();
+
+        Thread consumer = new Thread() {
+            public void run() {
+                Long bigTimeout = 42L;
+                pool.acquire(bigTimeout, TimeUnit.SECONDS);
+            }
+        };
+
+        try {
+            consumer.start();
+            Thread.sleep(LOCKUP_DETECT_TIMEOUT);
+
+            pool.release(acquired);
+            consumer.join(LOCKUP_DETECT_TIMEOUT);
+
+            assertFalse("consumer thread should be terminated", consumer.isAlive());
+        } catch (Exception unexpected) {
+            fail("something went wrong");
+        }
+
     }
 }
