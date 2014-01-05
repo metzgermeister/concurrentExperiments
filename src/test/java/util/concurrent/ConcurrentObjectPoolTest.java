@@ -62,7 +62,7 @@ public class ConcurrentObjectPoolTest {
             consumer.start();
             Thread.sleep(LOCKUP_DETECT_TIMEOUT);
 
-            pool.add(theOnlyResource);
+            assertTrue(pool.add(theOnlyResource));
             consumer.join(LOCKUP_DETECT_TIMEOUT);
 
             assertFalse("consumer should already acquire added resource", consumer.isAlive());
@@ -99,10 +99,27 @@ public class ConcurrentObjectPoolTest {
         pool.open();
 
         String resource = "Resource";
-        pool.add(resource);
+        assertTrue(pool.add(resource));
 
         String acquired = pool.acquire();
         assertSame(acquired, resource);
 
+    }
+
+    @Test
+    public void shouldRemoveResource() throws Exception {
+        pool.open();
+        String resource = "Some resource";
+        pool.add(resource);
+
+        assertTrue(pool.remove(resource));
+    }
+
+    @Test
+    public void shouldNotRemoveUnknownResource() throws Exception {
+        pool.open();
+
+        pool.add("Some resource");
+        assertFalse(pool.remove("unknown resource"));
     }
 }

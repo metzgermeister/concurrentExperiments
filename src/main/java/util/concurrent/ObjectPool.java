@@ -15,5 +15,6 @@ public interface ObjectPool<R> {
 
     //    void release(R resource);
     boolean add(R resource);
-//    boolean remove(R resource);
+
+    boolean remove(R resource);
 }

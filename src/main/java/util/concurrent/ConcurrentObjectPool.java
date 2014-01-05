@@ -88,4 +88,9 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         return result;
     }
 
+    @Override
+    public boolean remove(R resource) {
+        return availableResources.remove(resource);
+    }
+
 }
