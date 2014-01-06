@@ -13,6 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 //TODO check for addition of acquired resource
 //TODO handle releasing removed resource (removeNow())
+//TODO can't close closed pool
 public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     Logger logger = Logger.getLogger(ConcurrentObjectPool.class);
@@ -21,6 +22,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     private final Condition availableResourceIsPresent = availableResourcesLock.newCondition();
 
+    //TODO make atomic
     private volatile boolean isOpen;
 
     //TODO think about more efficient way - releasing requires a lookup through all collection
@@ -64,7 +66,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     }
 
     private void verifyIsOpen() {
-        Preconditions.checkState(isOpen, "pool must be open to acquire resource");
+        Preconditions.checkState(isOpen, "pool must be open to handle calls for resources");
     }
 
     private void onInterruptedException() {
@@ -105,6 +107,8 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     @Override
     public void release(R resource) {
+        verifyIsOpen();
+
         boolean removed = acquiredResources.remove(resource);
         Preconditions.checkArgument(removed, "attempted to release unknown or not acquired resource");
 
@@ -115,6 +119,8 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     @Override
     //TODO add mass test - 20 consumers and 1 producer
     public boolean add(R resource) {
+        verifyIsOpen();
+
         availableResourcesLock.lock();
         boolean result;
 
@@ -130,6 +136,8 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     @Override
     public boolean remove(R resource) {
+        verifyIsOpen();
+
         return availableResources.remove(resource);
     }
 

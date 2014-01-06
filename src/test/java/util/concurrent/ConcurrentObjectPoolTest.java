@@ -43,6 +43,21 @@ public class ConcurrentObjectPoolTest {
     }
 
     @Test(expected = IllegalStateException.class)
+    public void shouldNotAddToClosedPool() throws Exception {
+        pool.add("any");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldNotRemoveFromClosedPool() throws Exception {
+        pool.remove("any");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldNotReleaseOnClosedPool() throws Exception {
+        pool.release("any");
+    }
+
+    @Test(expected = IllegalStateException.class)
     public void shouldNotAcquireWithTimeoutFromClosedPool() throws Exception {
         pool.acquire(42, TimeUnit.NANOSECONDS);
     }
