@@ -42,6 +42,12 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     }
 
     @Override
+    public void close() {
+        boolean closed = isOpen.compareAndSet(true, false);
+        Preconditions.checkState(closed, "attempt to close already closed pool");
+    }
+
+    @Override
     public R acquire() {
         R result;
 

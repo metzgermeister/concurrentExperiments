@@ -55,32 +55,41 @@ public class ConcurrentObjectPoolTest {
 
     @Test(expected = IllegalStateException.class)
     public void shouldNotAcquireFromClosedPool() throws Exception {
+        assertFalse(pool.isOpen());
         pool.acquire();
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldNotAddToClosedPool() throws Exception {
+        assertFalse(pool.isOpen());
         pool.add("any");
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldNotOpenOpenedPool() {
+        assertFalse(pool.isOpen());
+
         pool.open();
+        assertTrue(pool.isOpen());
+
         pool.open();
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldNotRemoveFromClosedPool() throws Exception {
+        assertFalse(pool.isOpen());
         pool.remove("any");
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldNotReleaseOnClosedPool() throws Exception {
+        assertFalse(pool.isOpen());
         pool.release("any");
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldNotAcquireWithTimeoutFromClosedPool() throws Exception {
+        assertFalse(pool.isOpen());
         pool.acquire(42, TimeUnit.NANOSECONDS);
     }
 
@@ -231,4 +240,18 @@ public class ConcurrentObjectPoolTest {
 
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void shouldNotCloseClosedPool() {
+        assertFalse(pool.isOpen());
+        pool.close();
+    }
+
+    @Test
+    public void shouldClosePool() {
+        pool.open();
+        assertTrue(pool.isOpen());
+
+        pool.close();
+        assertFalse(pool.isOpen());
+    }
 }

@@ -7,7 +7,7 @@ public interface ObjectPool<R> {
 
     boolean isOpen();
 
-    //    void close();
+    void close();
 
     R acquire();
 
