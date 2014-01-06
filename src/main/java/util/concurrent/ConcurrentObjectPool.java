@@ -23,10 +23,9 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     private final Condition availableResourceIsPresent = availableResourcesLock.newCondition();
 
-    // TODO make atomic
     private final AtomicBoolean isOpen = new AtomicBoolean(false);
 
-    // TODO think about more efficient way - releasing requires a lookup through all collection
+    // TODO think about more efficient way - releasing requires a lookup through all collection - ConcurrentHashMap?
     private ConcurrentLinkedQueue<R> acquiredResources = new ConcurrentLinkedQueue<R>();
 
     private ConcurrentLinkedQueue<R> availableResources = new ConcurrentLinkedQueue<R>();
