@@ -14,7 +14,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 //TODO check for addition of acquired resource
 //TODO handle releasing removed resource (removeNow())
-//TODO can't close closed pool
 public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     Logger logger = Logger.getLogger(ConcurrentObjectPool.class);
@@ -47,23 +46,27 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     @Override
     public void close() {
         // TODO forbid resources acquiring when close() is called
+        Preconditions.checkState(isOpen.get(), "attempt to close already closed pool");
 
         resourcesLock.lock();
-
         try {
-            while (!acquiredResources.isEmpty()) {
-                try {
-                    resourceReleased.await();
-                } catch (InterruptedException e) {
-                    onInterruptedException(e);
-                }
-            }
-
-            boolean closed = isOpen.compareAndSet(true, false);
-            Preconditions.checkState(closed, "attempt to close already closed pool");
+            closePoolIfNoAcquiredResources();
         } finally {
             resourcesLock.unlock();
         }
+    }
+
+    private void closePoolIfNoAcquiredResources() {
+        while (!acquiredResources.isEmpty()) {
+            try {
+                resourceReleased.await();
+            } catch (InterruptedException e) {
+                onInterruptedException(e);
+            }
+        }
+
+        boolean closed = isOpen.compareAndSet(true, false);
+        Preconditions.checkState(closed, "attempt to close already closed pool");
     }
 
     @Override
@@ -74,20 +77,25 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         resourcesLock.lock();
 
         try {
-            while (availableResources.isEmpty()) {
-                try {
-                    availableResourceIsPresent.await();
-                } catch (InterruptedException e) {
-                    onInterruptedException(e);
-                }
-            }
-            result = availableResources.poll();
-            acquiredResources.add(result);
-
+            result = acquireIfAvailable();
         } finally {
             resourcesLock.unlock();
         }
 
+        return result;
+    }
+
+    private R acquireIfAvailable() {
+        R result;
+        while (availableResources.isEmpty()) {
+            try {
+                availableResourceIsPresent.await();
+            } catch (InterruptedException e) {
+                onInterruptedException(e);
+            }
+        }
+        result = availableResources.poll();
+        acquiredResources.add(result);
         return result;
     }
 
@@ -110,15 +118,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
         try {
             while (availableResources.isEmpty()) {
-                try {
-                    if (!stillWaiting) {
-                        logger.debug("exiting acquire by timeout");
-                        throw new ResourceNotAvailableException("Resource is unavailable");
-                    }
-                    stillWaiting = availableResourceIsPresent.await(timeout, timeUnit);
-                } catch (InterruptedException e) {
-                    onInterruptedException(e);
-                }
+                stillWaiting = waitForResourceWithTimeout(timeout, timeUnit, stillWaiting);
             }
             result = availableResources.poll();
             acquiredResources.add(result);
@@ -128,6 +128,19 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         }
 
         return result;
+    }
+
+    private boolean waitForResourceWithTimeout(long timeout, TimeUnit timeUnit, boolean stillWaiting) {
+        try {
+            if (!stillWaiting) {
+                logger.debug("exiting acquire by timeout");
+                throw new ResourceNotAvailableException("Resource is unavailable");
+            }
+            stillWaiting = availableResourceIsPresent.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            onInterruptedException(e);
+        }
+        return stillWaiting;
     }
 
     @Override
