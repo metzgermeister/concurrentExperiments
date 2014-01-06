@@ -19,13 +19,16 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     Logger logger = Logger.getLogger(ConcurrentObjectPool.class);
 
-    private final Lock availableResourcesLock = new ReentrantLock();
+    private final Lock resourcesLock = new ReentrantLock();
 
-    private final Condition availableResourceIsPresent = availableResourcesLock.newCondition();
+    private final Condition availableResourceIsPresent = resourcesLock.newCondition();
+
+    private final Condition resourceReleased = resourcesLock.newCondition();
 
     private final AtomicBoolean isOpen = new AtomicBoolean(false);
 
-    // TODO think about more efficient way - releasing requires a lookup through all collection - ConcurrentHashMap?
+    // TODO think about more efficient way - releasing requires a lookup through all collection -
+    // ConcurrentHashMap?
     private ConcurrentLinkedQueue<R> acquiredResources = new ConcurrentLinkedQueue<R>();
 
     private ConcurrentLinkedQueue<R> availableResources = new ConcurrentLinkedQueue<R>();
@@ -43,8 +46,24 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     @Override
     public void close() {
-        boolean closed = isOpen.compareAndSet(true, false);
-        Preconditions.checkState(closed, "attempt to close already closed pool");
+        // TODO forbid resources acquiring when close() is called
+
+        resourcesLock.lock();
+
+        try {
+            while (!acquiredResources.isEmpty()) {
+                try {
+                    resourceReleased.await();
+                } catch (InterruptedException e) {
+                    onInterruptedException(e);
+                }
+            }
+
+            boolean closed = isOpen.compareAndSet(true, false);
+            Preconditions.checkState(closed, "attempt to close already closed pool");
+        } finally {
+            resourcesLock.unlock();
+        }
     }
 
     @Override
@@ -52,21 +71,21 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         R result;
 
         verifyIsOpen();
-        availableResourcesLock.lock();
+        resourcesLock.lock();
 
         try {
             while (availableResources.isEmpty()) {
                 try {
                     availableResourceIsPresent.await();
                 } catch (InterruptedException e) {
-                    onInterruptedException();
+                    onInterruptedException(e);
                 }
             }
             result = availableResources.poll();
             acquiredResources.add(result);
 
         } finally {
-            availableResourcesLock.unlock();
+            resourcesLock.unlock();
         }
 
         return result;
@@ -76,9 +95,9 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         Preconditions.checkState(isOpen.get(), "pool must be open to handle calls for resources");
     }
 
-    private void onInterruptedException() {
+    private void onInterruptedException(InterruptedException e) {
         logger.error("exiting acquire by interrupted exception");
-        throw new IllegalUsageException("resuming due to improper usage");
+        throw new IllegalUsageException("resuming due to improper usage", e);
     }
 
     @Override
@@ -87,7 +106,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         verifyIsOpen();
 
         boolean stillWaiting = true;
-        availableResourcesLock.lock();
+        resourcesLock.lock();
 
         try {
             while (availableResources.isEmpty()) {
@@ -98,14 +117,14 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
                     }
                     stillWaiting = availableResourceIsPresent.await(timeout, timeUnit);
                 } catch (InterruptedException e) {
-                    onInterruptedException();
+                    onInterruptedException(e);
                 }
             }
             result = availableResources.poll();
             acquiredResources.add(result);
 
         } finally {
-            availableResourcesLock.unlock();
+            resourcesLock.unlock();
         }
 
         return result;
@@ -118,8 +137,19 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         boolean removed = acquiredResources.remove(resource);
         Preconditions.checkArgument(removed, "attempted to release unknown or not acquired resource");
 
+        signalResourceUnlocking();
+
         add(resource);
 
+    }
+
+    private void signalResourceUnlocking() {
+        resourcesLock.lock();
+        try {
+            resourceReleased.signal();
+        } finally {
+            resourcesLock.unlock();
+        }
     }
 
     @Override
@@ -127,14 +157,14 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     public boolean add(R resource) {
         verifyIsOpen();
 
-        availableResourcesLock.lock();
+        resourcesLock.lock();
         boolean result;
 
         try {
             result = availableResources.add(resource);
             availableResourceIsPresent.signal();
         } finally {
-            availableResourcesLock.unlock();
+            resourcesLock.unlock();
         }
 
         return result;

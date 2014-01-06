@@ -254,4 +254,37 @@ public class ConcurrentObjectPoolTest {
         pool.close();
         assertFalse(pool.isOpen());
     }
+
+    @Test
+    public void shouldBlockWhenClosingPoolWithAcquiredResources() {
+        pool.open();
+        pool.add("first resource");
+        pool.add("second resource");
+
+        Thread oneWhoClosesPool = new Thread() {
+            public void run() {
+                pool.close();
+            }
+        };
+
+        try {
+            String acquiredOne = pool.acquire();
+            String acquiredTwo = pool.acquire();
+
+            oneWhoClosesPool.start();
+            Thread.sleep(LOCKUP_DETECT_TIMEOUT);
+            assertTrue("thread should be blocked since there are acquired resources", oneWhoClosesPool.isAlive());
+
+            pool.release(acquiredOne);
+            pool.release(acquiredTwo);
+            oneWhoClosesPool.join(LOCKUP_DETECT_TIMEOUT);
+
+            assertFalse("resources were released - thread should have been already finished his job",
+                    oneWhoClosesPool.isAlive());
+
+        } catch (Exception unexpected) {
+            fail("something went wrong");
+        }
+
+    }
 }
