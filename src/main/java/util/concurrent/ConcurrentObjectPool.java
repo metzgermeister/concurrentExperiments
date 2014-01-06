@@ -13,7 +13,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 //TODO check for addition of acquired resource
-//TODO handle releasing removed resource (removeNow())
+//TODO handle releasing removed resource (after removeNow() method)
 public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     Logger logger = Logger.getLogger(ConcurrentObjectPool.class);

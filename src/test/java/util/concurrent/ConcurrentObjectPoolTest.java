@@ -287,4 +287,37 @@ public class ConcurrentObjectPoolTest {
         }
 
     }
+
+    @Test
+    public void shouldBlockOnRemovingAcquiredResource() {
+        pool.open();
+        final String resource = "resource";
+        pool.add(resource);
+
+        Thread oneWhoRemovesResource = new Thread() {
+            public void run() {
+                pool.remove(resource);
+            }
+        };
+
+        try {
+            String acquired = pool.acquire();
+            assertEquals(resource,acquired);
+
+            oneWhoRemovesResource.start();
+            Thread.sleep(LOCKUP_DETECT_TIMEOUT);
+            assertTrue("thread should be blocked since resource to be removed is acquired",
+                    oneWhoRemovesResource.isAlive());
+
+            pool.release(acquired);
+            oneWhoRemovesResource.join(LOCKUP_DETECT_TIMEOUT);
+
+            assertFalse("resources was released - remove operation should have completed",
+                    oneWhoRemovesResource.isAlive());
+
+        } catch (Exception unexpected) {
+            fail("something went wrong");
+        }
+
+    }
 }
