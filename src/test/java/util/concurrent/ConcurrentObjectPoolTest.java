@@ -15,7 +15,6 @@ public class ConcurrentObjectPoolTest {
     private static final long LOCKUP_DETECT_TIMEOUT = 1000L;
     private ConcurrentObjectPool<String> pool;
 
-
     static {
         BasicConfigurator.configure();
     }
@@ -24,7 +23,6 @@ public class ConcurrentObjectPoolTest {
     public void setUp() throws Exception {
         pool = new ConcurrentObjectPool<String>();
     }
-
 
     @Test
     public void shouldBeInitiallyClosed() throws Exception {
@@ -37,6 +35,24 @@ public class ConcurrentObjectPoolTest {
         assertTrue(pool.isOpen());
     }
 
+    @Test
+    public void shouldOpenFromOtherThread() throws Exception {
+        Thread poolOpener = new Thread() {
+            public void run() {
+                pool.open();
+            }
+        };
+
+        try {
+            assertFalse(pool.isOpen());
+            poolOpener.start();
+            Thread.sleep(LOCKUP_DETECT_TIMEOUT);
+            assertTrue(pool.isOpen());
+        } catch (Exception unexpected) {
+            fail("something went wrong");
+        }
+    }
+
     @Test(expected = IllegalStateException.class)
     public void shouldNotAcquireFromClosedPool() throws Exception {
         pool.acquire();
@@ -45,6 +61,12 @@ public class ConcurrentObjectPoolTest {
     @Test(expected = IllegalStateException.class)
     public void shouldNotAddToClosedPool() throws Exception {
         pool.add("any");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldNotOpenOpenedPool() {
+        pool.open();
+        pool.open();
     }
 
     @Test(expected = IllegalStateException.class)
@@ -62,7 +84,6 @@ public class ConcurrentObjectPoolTest {
         pool.acquire(42, TimeUnit.NANOSECONDS);
     }
 
-
     @Test
     public void shouldWakeUpBlockedConsumerByAddingResource() throws Exception {
         pool.open();
@@ -76,7 +97,6 @@ public class ConcurrentObjectPoolTest {
                 finallyAcquired.set(theOnlyResource.equals(acquired));
             }
         };
-
 
         try {
             consumer.start();
@@ -142,7 +162,6 @@ public class ConcurrentObjectPoolTest {
         pool.add("Some resource");
         assertFalse(pool.remove("unknown resource"));
     }
-
 
     @Test
     public void shouldAcquireAndReleaseResource() throws Exception {
@@ -211,4 +230,5 @@ public class ConcurrentObjectPoolTest {
         }
 
     }
+
 }

@@ -7,6 +7,7 @@ import util.concurrent.exception.ResourceNotAvailableException;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -22,22 +23,23 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     private final Condition availableResourceIsPresent = availableResourcesLock.newCondition();
 
-    //TODO make atomic
-    private volatile boolean isOpen;
+    // TODO make atomic
+    private final AtomicBoolean isOpen = new AtomicBoolean(false);
 
-    //TODO think about more efficient way - releasing requires a lookup through all collection
+    // TODO think about more efficient way - releasing requires a lookup through all collection
     private ConcurrentLinkedQueue<R> acquiredResources = new ConcurrentLinkedQueue<R>();
 
     private ConcurrentLinkedQueue<R> availableResources = new ConcurrentLinkedQueue<R>();
 
     @Override
     public void open() {
-        isOpen = true;
+        boolean opened = isOpen.compareAndSet(false, true);
+        Preconditions.checkState(opened, "attempt to open already opened pool");
     }
 
     @Override
     public boolean isOpen() {
-        return isOpen;
+        return isOpen.get();
     }
 
     @Override
@@ -66,7 +68,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     }
 
     private void verifyIsOpen() {
-        Preconditions.checkState(isOpen, "pool must be open to handle calls for resources");
+        Preconditions.checkState(isOpen.get(), "pool must be open to handle calls for resources");
     }
 
     private void onInterruptedException() {
@@ -104,7 +106,6 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         return result;
     }
 
-
     @Override
     public void release(R resource) {
         verifyIsOpen();
@@ -117,7 +118,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     }
 
     @Override
-    //TODO add mass test - 20 consumers and 1 producer
+    // TODO add mass test - 20 consumers and 1 producer
     public boolean add(R resource) {
         verifyIsOpen();
 
