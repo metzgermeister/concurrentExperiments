@@ -173,7 +173,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     private void signalResourceUnlocking() {
         resourcesLock.lock();
         try {
-            resourceReleased.signal();
+            resourceReleased.signalAll();
         } finally {
             resourcesLock.unlock();
         }
