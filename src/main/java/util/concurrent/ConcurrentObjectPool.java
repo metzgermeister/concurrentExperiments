@@ -1,7 +1,5 @@
 package util.concurrent;
 
-import com.google.common.base.Preconditions;
-import org.apache.log4j.Logger;
 import util.concurrent.exception.IllegalUsageException;
 import util.concurrent.exception.ResourceNotAvailableException;
 
@@ -19,8 +17,6 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     private static final String ATTEMPT_TO_CLOSE_ALREADY_CLOSED_POOL = "attempt to close already closed pool";
 
-    Logger logger = Logger.getLogger(ConcurrentObjectPool.class);
-
     private final Lock resourcesLock = new ReentrantLock();
 
     private final Condition availableResourceIsPresent = resourcesLock.newCondition();
@@ -37,7 +33,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     @Override
     public void open() {
         boolean opened = isOpen.compareAndSet(false, true);
-        Preconditions.checkState(opened, "attempt to open already opened pool");
+        Validate.checkState(opened, "attempt to open already opened pool");
     }
 
     @Override
@@ -47,7 +43,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     @Override
     public void close() {
-        Preconditions.checkState(isOpen.get(), ATTEMPT_TO_CLOSE_ALREADY_CLOSED_POOL);
+        Validate.checkState(isOpen.get(), ATTEMPT_TO_CLOSE_ALREADY_CLOSED_POOL);
 
 
         resourcesLock.lock();
@@ -63,7 +59,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     @Override
     public void closeNow() {
-        Preconditions.checkState(isOpen.get(), ATTEMPT_TO_CLOSE_ALREADY_CLOSED_POOL);
+        Validate.checkState(isOpen.get(), ATTEMPT_TO_CLOSE_ALREADY_CLOSED_POOL);
         closePool();
     }
 
@@ -81,13 +77,13 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     private void closePool() {
         boolean closed = isOpen.compareAndSet(true, false);
-        Preconditions.checkState(closed, ATTEMPT_TO_CLOSE_ALREADY_CLOSED_POOL);
+        Validate.checkState(closed, ATTEMPT_TO_CLOSE_ALREADY_CLOSED_POOL);
     }
 
     @Override
     public R acquire() {
         verifyIsOpen();
-        Preconditions.checkState(!isClosing.get(), "attempt to acquire resource from closing pool");
+        Validate.checkState(!isClosing.get(), "attempt to acquire resource from closing pool");
 
         resourcesLock.lock();
 
@@ -116,11 +112,11 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     }
 
     private void verifyIsOpen() {
-        Preconditions.checkState(isOpen.get(), "pool must be open to handle calls for resources");
+        Validate.checkState(isOpen.get(), "pool must be open to handle calls for resources");
     }
 
     private void onInterruptedException(InterruptedException e) {
-        logger.error("exiting acquire by interrupted exception");
+        System.out.println("exiting acquire by interrupted exception");
         throw new IllegalUsageException("resuming due to improper usage", e);
     }
 
@@ -149,7 +145,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     private boolean waitForResourceWithTimeout(long timeout, TimeUnit timeUnit, boolean stillWaiting) {
         try {
             if (!stillWaiting) {
-                logger.debug("exiting acquire by timeout");
+                System.out.println("exiting acquire by timeout");
                 throw new ResourceNotAvailableException("Resource is unavailable");
             }
             stillWaiting = availableResourceIsPresent.await(timeout, timeUnit);
@@ -164,7 +160,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         verifyIsOpen();
 
         boolean removed = acquiredResources.remove(resource);
-        Preconditions.checkArgument(removed, "attempted to release unknown or not acquired resource");
+        Validate.checkArgument(removed, "attempted to release unknown or not acquired resource");
 
         signalResourceUnlocking();
 
@@ -185,7 +181,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     public boolean add(R resource) {
         verifyIsOpen();
 
-        Preconditions.checkArgument(!acquiredResources.contains(resource), "attempt to add acquired resource");
+        Validate.checkArgument(!acquiredResources.contains(resource), "attempt to add acquired resource");
 
         resourcesLock.lock();
         boolean result;

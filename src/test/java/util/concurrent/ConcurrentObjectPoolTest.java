@@ -1,6 +1,5 @@
 package util.concurrent;
 
-import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
 import org.junit.Test;
 import util.concurrent.exception.IllegalUsageException;
@@ -16,9 +15,6 @@ public class ConcurrentObjectPoolTest {
     private static final long LOCKUP_DETECT_TIMEOUT = 1000L;
     private ConcurrentObjectPool<String> pool;
 
-    static {
-        BasicConfigurator.configure();
-    }
 
     @Before
     public void setUp() throws Exception {
