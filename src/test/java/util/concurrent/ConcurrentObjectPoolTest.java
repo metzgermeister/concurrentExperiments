@@ -66,6 +66,16 @@ public class ConcurrentObjectPoolTest {
         pool.add("any");
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotAddAlreadyAcquiredResource() throws Exception {
+        pool.open();
+        pool.add("resource");
+        String acquired = pool.acquire();
+
+        pool.add(acquired);
+
+    }
+
     @Test(expected = IllegalStateException.class)
     public void shouldNotOpenOpenedPool() {
         assertFalse(pool.isOpen());
