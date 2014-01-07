@@ -181,12 +181,12 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     public boolean add(R resource) {
         verifyIsOpen();
 
-        Validate.checkArgument(!acquiredResources.contains(resource), "attempt to add acquired resource");
-
         resourcesLock.lock();
         boolean result;
 
         try {
+            Validate.checkArgument(!acquiredResources.contains(resource), "attempt to add acquired resource");
+            Validate.checkArgument(!availableResources.contains(resource), "attempt to add resource twice");
             result = availableResources.add(resource);
             availableResourceIsPresent.signal();
         } finally {

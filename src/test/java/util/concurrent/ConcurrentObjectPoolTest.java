@@ -427,4 +427,13 @@ public class ConcurrentObjectPoolTest {
         pool.removeNow(acquired);
         pool.release(acquired);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotAddSameResourceTwice() throws Exception {
+        pool.open();
+
+        String resource = "resource";
+        pool.add(resource);
+        pool.add(resource);
+    }
 }
