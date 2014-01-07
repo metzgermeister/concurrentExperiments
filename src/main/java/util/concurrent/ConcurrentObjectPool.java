@@ -24,6 +24,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     private final Condition resourceReleased = resourcesLock.newCondition();
 
     private final AtomicBoolean isOpen = new AtomicBoolean(false);
+    private final AtomicBoolean isClosing = new AtomicBoolean(false);
 
     // TODO think about more efficient way - releasing requires a lookup through all collection -
     // ConcurrentHashMap?
@@ -44,13 +45,16 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     @Override
     public void close() {
-        // TODO forbid resources acquiring when close() is called
         Preconditions.checkState(isOpen.get(), "attempt to close already closed pool");
 
+
         resourcesLock.lock();
+        isClosing.set(true);
+
         try {
             closePoolIfNoAcquiredResources();
         } finally {
+            isClosing.set(false);
             resourcesLock.unlock();
         }
     }
@@ -70,11 +74,12 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     @Override
     public R acquire() {
-        R result;
-
         verifyIsOpen();
+        Preconditions.checkState(!isClosing.get(),"attempt to acquire resource from closing pool");
+
         resourcesLock.lock();
 
+        R result;
         try {
             result = acquireIfAvailable();
         } finally {

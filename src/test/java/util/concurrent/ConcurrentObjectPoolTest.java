@@ -274,21 +274,26 @@ public class ConcurrentObjectPoolTest {
         assertFalse(pool.isOpen());
     }
 
+
+    private class OneWhoClosesPool extends Thread {
+        public void run() {
+            pool.close();
+        }
+    }
+
+
     @Test
     public void shouldBlockWhenClosingPoolWithAcquiredResources() {
         pool.open();
         pool.add("first resource");
         pool.add("second resource");
 
-        Thread oneWhoClosesPool = new Thread() {
-            public void run() {
-                pool.close();
-            }
-        };
 
         try {
             String acquiredOne = pool.acquire();
             String acquiredTwo = pool.acquire();
+
+            OneWhoClosesPool oneWhoClosesPool = new OneWhoClosesPool();
 
             oneWhoClosesPool.start();
             Thread.sleep(LOCKUP_DETECT_TIMEOUT);
@@ -304,6 +309,35 @@ public class ConcurrentObjectPoolTest {
         } catch (Exception unexpected) {
             fail("something went wrong: " + unexpected.getMessage());
         }
+
+    }
+
+    @Test
+    public void shouldForbidAcquiringResourcesWhenPoolIsClosing() throws Exception {
+
+        pool.open();
+        pool.add("first resource");
+        pool.add("second resource");
+
+        boolean exceptionThrown = false;
+        try {
+            pool.acquire();
+
+            OneWhoClosesPool oneWhoClosesPool = new OneWhoClosesPool();
+
+            oneWhoClosesPool.start();
+            Thread.sleep(LOCKUP_DETECT_TIMEOUT);
+            assertTrue("thread should be blocked since there are acquired resources", oneWhoClosesPool.isAlive());
+
+            pool.acquire();
+            fail("resource can't be acquired when pool is closing");
+        } catch (IllegalStateException e) {
+            exceptionThrown = true;
+        } catch (Exception unexpected) {
+            fail("something went wrong: " + unexpected.getMessage());
+        }
+
+        assertTrue("expecting IllegalStateException", exceptionThrown);
 
     }
 
