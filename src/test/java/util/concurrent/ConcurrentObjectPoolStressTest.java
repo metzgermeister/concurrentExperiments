@@ -10,7 +10,7 @@ import java.util.concurrent.CyclicBarrier;
 import static org.junit.Assert.assertTrue;
 
 public class ConcurrentObjectPoolStressTest {
-    private static final long LOCKUP_DETECT_TIMEOUT = 10 * 1000L;
+    private static final long LOCKUP_DETECT_TIMEOUT = 42 * 1000L;
     private ConcurrentObjectPool<Object> objectsPool;
 
     @Before
@@ -22,6 +22,9 @@ public class ConcurrentObjectPoolStressTest {
     @Test(timeout = LOCKUP_DETECT_TIMEOUT)
     public void shouldAcquireAndReleaseResources() throws Exception {
         final int totalResourcesCount = 10;
+        final int totalConsumerThreads = 50;
+        final int numberOfThreadOperations = 1000;
+
         List<Object> resources = new ArrayList<Object>(totalResourcesCount); //will be used for pool clearance
 
         for (int i = 0; i < totalResourcesCount; i++) {
@@ -30,8 +33,6 @@ public class ConcurrentObjectPoolStressTest {
             resources.add(resource);
         }
 
-        final int totalConsumerThreads = 100;
-        final int numberOfThreadOperations = 1000;
         final CyclicBarrier barrier = new CyclicBarrier(totalConsumerThreads + 1);
 
         for (int i = 0; i < totalConsumerThreads; i++) {
@@ -64,6 +65,7 @@ public class ConcurrentObjectPoolStressTest {
             try {
                 for (int i = 0; i < workCycles; i++) {
                     Object acquired = objectsPool.acquire();
+                    sleep(1L); //force context switching
                     objectsPool.release(acquired);
                 }
                 barrier.await();

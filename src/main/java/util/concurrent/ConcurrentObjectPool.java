@@ -182,7 +182,6 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     }
 
     @Override
-    // TODO add mass test - 20 consumers and 1 producer
     public boolean add(R resource) {
         verifyIsOpen();
 
