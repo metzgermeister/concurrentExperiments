@@ -17,6 +17,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
+    private static final String ATTEMPT_TO_CLOSE_ALREADY_CLOSED_POOL = "attempt to close already closed pool";
+
     Logger logger = Logger.getLogger(ConcurrentObjectPool.class);
 
     private final Lock resourcesLock = new ReentrantLock();
@@ -45,7 +47,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     @Override
     public void close() {
-        Preconditions.checkState(isOpen.get(), "attempt to close already closed pool");
+        Preconditions.checkState(isOpen.get(), ATTEMPT_TO_CLOSE_ALREADY_CLOSED_POOL);
 
 
         resourcesLock.lock();
@@ -61,7 +63,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     @Override
     public void closeNow() {
-        Preconditions.checkState(isOpen.get(), "attempt to close already closed pool");
+        Preconditions.checkState(isOpen.get(), ATTEMPT_TO_CLOSE_ALREADY_CLOSED_POOL);
         closePool();
     }
 
@@ -79,7 +81,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     private void closePool() {
         boolean closed = isOpen.compareAndSet(true, false);
-        Preconditions.checkState(closed, "attempt to close already closed pool");
+        Preconditions.checkState(closed, ATTEMPT_TO_CLOSE_ALREADY_CLOSED_POOL);
     }
 
     @Override
