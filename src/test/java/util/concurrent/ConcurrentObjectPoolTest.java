@@ -265,6 +265,12 @@ public class ConcurrentObjectPoolTest {
         pool.close();
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void shouldNotCloseNowClosedPool() {
+        assertFalse(pool.isOpen());
+        pool.closeNow();
+    }
+
     @Test
     public void shouldClosePool() {
         pool.open();
@@ -372,5 +378,23 @@ public class ConcurrentObjectPoolTest {
             fail("something went wrong: " + unexpected.getMessage());
         }
 
+    }
+
+    @Test(timeout = LOCKUP_DETECT_TIMEOUT)
+    public void shouldCloseNowEvenWhenResourceIsAcquired() throws Exception {
+        pool.open();
+        pool.add("resource");
+        pool.acquire();
+        pool.closeNow();
+    }
+
+    @Test(timeout = LOCKUP_DETECT_TIMEOUT, expected = IllegalStateException.class)
+    public void shouldNotReleaseResourceAfterForcedClose() throws Exception {
+        pool.open();
+        pool.add("resource");
+        String acquired = pool.acquire();
+
+        pool.closeNow();
+        pool.release(acquired);
     }
 }

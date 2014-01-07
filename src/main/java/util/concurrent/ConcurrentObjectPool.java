@@ -59,6 +59,12 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
         }
     }
 
+    @Override
+    public void closeNow() {
+        Preconditions.checkState(isOpen.get(), "attempt to close already closed pool");
+        closePool();
+    }
+
     private void closePoolIfNoAcquiredResources() {
         while (!acquiredResources.isEmpty()) {
             try {
@@ -68,6 +74,10 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
             }
         }
 
+        closePool();
+    }
+
+    private void closePool() {
         boolean closed = isOpen.compareAndSet(true, false);
         Preconditions.checkState(closed, "attempt to close already closed pool");
     }
@@ -75,7 +85,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     @Override
     public R acquire() {
         verifyIsOpen();
-        Preconditions.checkState(!isClosing.get(),"attempt to acquire resource from closing pool");
+        Preconditions.checkState(!isClosing.get(), "attempt to acquire resource from closing pool");
 
         resourcesLock.lock();
 

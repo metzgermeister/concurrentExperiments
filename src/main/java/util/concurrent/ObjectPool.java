@@ -9,6 +9,8 @@ public interface ObjectPool<R> {
 
     void close();
 
+    void closeNow();
+
     R acquire();
 
     R acquire(long timeout, TimeUnit timeUnit);
