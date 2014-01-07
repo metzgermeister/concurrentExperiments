@@ -12,7 +12,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-//TODO handle releasing removed resource (after removeNow() method)
 public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
 
     Logger logger = Logger.getLogger(ConcurrentObjectPool.class);
@@ -217,6 +216,23 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
             resourcesLock.unlock();
         }
 
+        return removed;
+    }
+
+    @Override
+    public boolean removeNow(R resource) {
+        verifyIsOpen();
+
+        boolean removed;
+        resourcesLock.lock();
+        try {
+            removed = acquiredResources.remove(resource);
+            if (!removed) {
+                removed = availableResources.remove(resource);
+            }
+        } finally {
+            resourcesLock.unlock();
+        }
         return removed;
     }
 

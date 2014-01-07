@@ -98,6 +98,7 @@ public class ConcurrentObjectPoolTest {
         pool.release("any");
     }
 
+
     @Test(expected = IllegalStateException.class)
     public void shouldNotAcquireWithTimeoutFromClosedPool() throws Exception {
         assertFalse(pool.isOpen());
@@ -395,6 +396,39 @@ public class ConcurrentObjectPoolTest {
         String acquired = pool.acquire();
 
         pool.closeNow();
+        pool.release(acquired);
+    }
+
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldNotRemoveNowOnClosedPool() throws Exception {
+        assertFalse(pool.isOpen());
+        pool.removeNow("any");
+    }
+
+    @Test(timeout = LOCKUP_DETECT_TIMEOUT)
+    public void shouldRemoveNowAcquiredResource() throws Exception {
+        pool.open();
+        pool.add("resource");
+        String acquired = pool.acquire();
+
+        assertTrue(pool.removeNow(acquired));
+    }
+
+    @Test
+    public void shouldNotRemoveNowUnknownResource() throws Exception {
+        pool.open();
+        pool.add("some resource");
+        assertFalse(pool.removeNow("unknown resource"));
+    }
+
+    @Test(expected = IllegalArgumentException.class, timeout = LOCKUP_DETECT_TIMEOUT)
+    public void shouldNotReleaseRemovedResource() throws Exception {
+        pool.open();
+        pool.add("resource");
+
+        String acquired = pool.acquire();
+        pool.removeNow(acquired);
         pool.release(acquired);
     }
 }

@@ -20,4 +20,6 @@ public interface ObjectPool<R> {
     boolean add(R resource);
 
     boolean remove(R resource);
+
+    boolean removeNow(R resource);
 }
