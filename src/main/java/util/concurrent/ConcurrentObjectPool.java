@@ -5,6 +5,9 @@ import org.apache.log4j.Logger;
 import util.concurrent.exception.IllegalUsageException;
 import util.concurrent.exception.ResourceNotAvailableException;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,9 +28,7 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     private final AtomicBoolean isOpen = new AtomicBoolean(false);
     private final AtomicBoolean isClosing = new AtomicBoolean(false);
 
-    // TODO think about more efficient way - releasing requires a lookup through all collection -
-    // ConcurrentHashMap?
-    private ConcurrentLinkedQueue<R> acquiredResources = new ConcurrentLinkedQueue<R>();
+    private Set<R> acquiredResources = Collections.newSetFromMap(new ConcurrentHashMap<R, Boolean>());
 
     private ConcurrentLinkedQueue<R> availableResources = new ConcurrentLinkedQueue<R>();
 
