@@ -187,7 +187,21 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     public boolean remove(R resource) {
         verifyIsOpen();
 
-        return availableResources.remove(resource);
+        boolean removed = false;
+        resourcesLock.lock();
+        try {
+            while (acquiredResources.contains(resource)) {
+                resourceReleased.await();
+            }
+            removed = availableResources.remove(resource);
+
+        } catch (InterruptedException e) {
+            onInterruptedException(e);
+        } finally {
+            resourcesLock.unlock();
+        }
+
+        return removed;
     }
 
 }

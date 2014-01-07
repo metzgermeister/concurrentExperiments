@@ -3,6 +3,7 @@ package util.concurrent;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
 import org.junit.Test;
+import util.concurrent.exception.IllegalUsageException;
 import util.concurrent.exception.ResourceNotAvailableException;
 
 import java.util.concurrent.TimeUnit;
@@ -49,7 +50,7 @@ public class ConcurrentObjectPoolTest {
             Thread.sleep(LOCKUP_DETECT_TIMEOUT);
             assertTrue(pool.isOpen());
         } catch (Exception unexpected) {
-            fail("something went wrong");
+            fail("something went wrong: " + unexpected.getMessage());
         }
     }
 
@@ -116,19 +117,26 @@ public class ConcurrentObjectPoolTest {
 
             assertFalse("consumer should already acquire added resource", consumer.isAlive());
         } catch (Exception unexpected) {
-            fail("something went wrong");
+            fail("something went wrong: " + unexpected.getMessage());
         }
 
         assertTrue("consumer haven't acquired resource", finallyAcquired.get());
     }
 
     @Test
-    public void consumerShouldBeBlockedIfResourcesAreNotPresent() {
+    public void shouldThrowExceptionOnInterrupt() {
         pool.open();
 
+        final AtomicBoolean illegalUsageExceptionFaced = new AtomicBoolean(false);
         Thread consumer = new Thread() {
             public void run() {
-                pool.acquire();
+                try {
+                    pool.acquire();
+                    fail("should never get here due to exception on interrupt()");
+                } catch (IllegalUsageException e) {
+                    illegalUsageExceptionFaced.set(true);
+                }
+
             }
         };
 
@@ -138,8 +146,9 @@ public class ConcurrentObjectPoolTest {
             consumer.interrupt();
             consumer.join(LOCKUP_DETECT_TIMEOUT);
             assertFalse("consumer thread should be terminated", consumer.isAlive());
+            assertTrue("consumer thread should афсу IllegalUsageException", illegalUsageExceptionFaced.get());
         } catch (Exception unexpected) {
-            fail("something went wrong");
+            fail("something went wrong: " + unexpected.getMessage());
         }
     }
 
@@ -235,7 +244,7 @@ public class ConcurrentObjectPoolTest {
 
             assertFalse("consumer thread should be terminated", consumer.isAlive());
         } catch (Exception unexpected) {
-            fail("something went wrong");
+            fail("something went wrong: " + unexpected.getMessage());
         }
 
     }
@@ -283,7 +292,7 @@ public class ConcurrentObjectPoolTest {
                     oneWhoClosesPool.isAlive());
 
         } catch (Exception unexpected) {
-            fail("something went wrong");
+            fail("something went wrong: " + unexpected.getMessage());
         }
 
     }
@@ -302,7 +311,7 @@ public class ConcurrentObjectPoolTest {
 
         try {
             String acquired = pool.acquire();
-            assertEquals(resource,acquired);
+            assertEquals(resource, acquired);
 
             oneWhoRemovesResource.start();
             Thread.sleep(LOCKUP_DETECT_TIMEOUT);
@@ -316,7 +325,7 @@ public class ConcurrentObjectPoolTest {
                     oneWhoRemovesResource.isAlive());
 
         } catch (Exception unexpected) {
-            fail("something went wrong");
+            fail("something went wrong: " + unexpected.getMessage());
         }
 
     }
