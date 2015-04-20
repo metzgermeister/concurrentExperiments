@@ -16,22 +16,29 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
         this.blockSize = blockSize;
     }
     
-    public Integer[][] multiply(Integer[][] a, Integer[][] b) {
+    @Override
+    protected void validate(Integer[][] a, Integer[][] b) {
+        super.validate(a, b);
         validate(a, b);
         validateSquare(a);
         validateSquare(b);
         validateDimension(a.length);
         validateDimension(b.length);
         
+    }
+    
+    public Integer[][] multiply(Integer[][] a, Integer[][] b) {
         Integer[][] result = new Integer[a.length][a.length];
-        
         List<MatrixMultiplyTask> tasks = fillMultiplyTasks(a, b);
-        
-        tasks.forEach(this::multiply);
-        
+    
+        processTasks(tasks);
+    
         gatherResults(result, tasks);
-        
         return result;
+    }
+    
+    private void processTasks(List<MatrixMultiplyTask> tasks) {
+        tasks.forEach(this::multiply);
     }
     
     private void gatherResults(Integer[][] result, List<MatrixMultiplyTask> tasks) {
