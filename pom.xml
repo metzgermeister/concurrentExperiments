@@ -7,6 +7,12 @@
     <groupId>test</groupId>
     <artifactId>concurrentExperiments</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <properties>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+    </properties>
+    
     <dependencies>
         
         <dependency>
@@ -32,6 +38,23 @@
         </dependency>
     
     </dependencies>
+    
+    <!-- Begin build configuration -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin> <!-- override definition from system-wide super pom and all it properties-->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <compilerVersion>${java.version}</compilerVersion>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 
 </project>
