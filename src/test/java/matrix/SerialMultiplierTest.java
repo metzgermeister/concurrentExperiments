@@ -3,6 +3,7 @@ package matrix;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SerialMultiplierTest {
     
@@ -17,7 +18,7 @@ public class SerialMultiplierTest {
         };
         
         Integer[][] B = {
-                {0, 0},
+                {0, 0},                                         
                 {1, 0}
         };
         
@@ -32,8 +33,17 @@ public class SerialMultiplierTest {
                 {0, 1}
         };
         
-        assertArrayEquals(C, serialMultiplier.multiply(A, B));
-        assertArrayEquals(D, serialMultiplier.multiply(B, A));
+        int irrelevant = 42;
+        
+        MatrixMultiplyTask task = new MatrixMultiplyTask(A, B, irrelevant, irrelevant);
+        serialMultiplier.multiply(task);
+        assertTrue(task.isCalculated());
+        assertArrayEquals(C, task.getResult());
+        
+        MatrixMultiplyTask secondTask = new MatrixMultiplyTask(B, A, irrelevant, irrelevant);
+        serialMultiplier.multiply(secondTask);
+        assertTrue(secondTask.isCalculated());
+        assertArrayEquals(D, secondTask.getResult());
         
     }
     

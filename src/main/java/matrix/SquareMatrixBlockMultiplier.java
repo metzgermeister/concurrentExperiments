@@ -3,7 +3,6 @@ package matrix;
 import org.apache.commons.lang3.Validate;
 
 import static matrix.ArraysUtil.copyBlockToMatrix;
-import static matrix.ArraysUtil.finePrint;
 import static matrix.ArraysUtil.getSubMatrix;
 
 public class SquareMatrixBlockMultiplier extends SerialMultiplier {
@@ -14,7 +13,7 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
         this.blockSize = blockSize;
     }
     
-    @Override
+    //    @Override
     public Integer[][] multiply(Integer[][] a, Integer[][] b) {
         validate(a, b);
         validateSquare(a);
@@ -29,8 +28,9 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
             for (int j = 0; j < blocksInDimensionNum; j++) {
                 Integer[][] horizontalStripe = getHorizontalStripe(a, j);
                 Integer[][] verticalStripe = getVerticalStripe(b, i);
-                Integer[][] resultBlock = super.multiply(horizontalStripe, verticalStripe);
-                copyBlockToMatrix(result, i * blockSize, j * blockSize, resultBlock);
+                MatrixMultiplyTask task = new MatrixMultiplyTask(horizontalStripe, verticalStripe, i, j);
+                super.multiply(task);
+                copyBlockToMatrix(result, i * blockSize, j * blockSize, task.getResult());
             }
         }
         return result;

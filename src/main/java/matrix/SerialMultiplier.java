@@ -5,7 +5,7 @@ import static matrix.ArraysUtil.zero;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.noNullElements;
 
-public class SerialMultiplier  {
+public class SerialMultiplier {
     
     protected void validate(Integer[][] a, Integer[][] b) {
         noNullElements(a);
@@ -17,7 +17,13 @@ public class SerialMultiplier  {
         isTrue(aColumns == bRows, "A:Rows: " + aColumns + " did not match B:Columns " + bRows + ".");
     }
     
-    public Integer[][] multiply(Integer[][] a, Integer[][] b) {
+    public void multiply(MatrixMultiplyTask task) {
+        task.markCalculated();
+        task.setResult(multiply(task.getA(), task.getB()));
+    }
+    
+    
+    private Integer[][] multiply(Integer[][] a, Integer[][] b) {
         validate(a, b);
         
         int aRows = a.length;
