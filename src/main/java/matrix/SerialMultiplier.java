@@ -7,23 +7,13 @@ import static org.apache.commons.lang3.Validate.noNullElements;
 
 public class SerialMultiplier {
     
-    protected void validate(Integer[][] a, Integer[][] b) {
-        noNullElements(a);
-        noNullElements(b);
-        
-        int aColumns = a[0].length;
-        int bRows = b.length;
-        
-        isTrue(aColumns == bRows, "A:Rows: " + aColumns + " did not match B:Columns " + bRows + ".");
-    }
-    
-    public void multiply(MatrixMultiplyTask task) {
+    protected void multiply(MatrixMultiplyTask task) {
+        task.setResult(multiplySerial(task.getA(), task.getB()));
         task.markCalculated();
-        task.setResult(multiply(task.getA(), task.getB()));
     }
     
-    
-    private Integer[][] multiply(Integer[][] a, Integer[][] b) {
+    //TODO pivanenko util
+    public Integer[][] multiplySerial(Integer[][] a, Integer[][] b) {
         validate(a, b);
         
         int aRows = a.length;
@@ -43,6 +33,16 @@ public class SerialMultiplier {
             }
         }
         return result;
+    }
+    
+    private void validate(Integer[][] a, Integer[][] b) {
+        noNullElements(a);
+        noNullElements(b);
+        
+        int aColumns = a[0].length;
+        int bRows = b.length;
+        
+        isTrue(aColumns == bRows, "A:Rows: " + aColumns + " did not match B:Columns " + bRows + ".");
     }
     
     

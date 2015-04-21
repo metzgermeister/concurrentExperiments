@@ -4,7 +4,7 @@ public class MatrixMultiplyTask {
     private final Integer[][] a;
     private final Integer[][] b;
     private Integer[][] result;
-    private boolean calculated = false;
+    private volatile boolean calculated = false;
     final int horisontalBlockNum;
     final int verticalBlockNum;
     

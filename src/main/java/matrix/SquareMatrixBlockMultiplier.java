@@ -10,16 +10,14 @@ import static matrix.ArraysUtil.getSubMatrix;
 
 public class SquareMatrixBlockMultiplier extends SerialMultiplier {
     
+    //TODO pivanenko change to decomposition size
     private final int blockSize;
     
     public SquareMatrixBlockMultiplier(int blockSize) {
         this.blockSize = blockSize;
     }
     
-    @Override
-    protected void validate(Integer[][] a, Integer[][] b) {
-        super.validate(a, b);
-        validate(a, b);
+    private void validateSquare(Integer[][] a, Integer[][] b) {
         validateSquare(a);
         validateSquare(b);
         validateDimension(a.length);
@@ -28,6 +26,7 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
     }
     
     public Integer[][] multiply(Integer[][] a, Integer[][] b) {
+        validateSquare(a, b);
         Integer[][] result = new Integer[a.length][a.length];
         List<MatrixMultiplyTask> tasks = fillMultiplyTasks(a, b);
     
@@ -37,7 +36,7 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
         return result;
     }
     
-    private void processTasks(List<MatrixMultiplyTask> tasks) {
+    protected void processTasks(List<MatrixMultiplyTask> tasks) {
         tasks.forEach(this::multiply);
     }
     
