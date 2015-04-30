@@ -1,4 +1,4 @@
-package matrix;
+package matrix.util;
 
 import org.apache.commons.lang3.Validate;
 
@@ -6,7 +6,9 @@ import java.io.PrintStream;
 
 import static org.apache.commons.lang3.Validate.noNullElements;
 
-public class ArraysUtil {
+public final class ArraysUtil {
+    private ArraysUtil() {
+    }
     
     public static void copyBlockToMatrix(Integer[][] matrix, int startHorizontalPosition, int startVerticalPosition,
                                          Integer[][] block) {

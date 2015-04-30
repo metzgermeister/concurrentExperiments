@@ -1,7 +1,7 @@
 package matrix;
 
 
-import static matrix.ArraysUtil.zero;
+import static matrix.util.ArraysUtil.zero;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.noNullElements;
 

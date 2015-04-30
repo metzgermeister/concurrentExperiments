@@ -1,5 +1,6 @@
-package matrix;
+package matrix.util;
 
+import matrix.util.ArraysUtil;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;

@@ -5,8 +5,8 @@ import org.apache.commons.lang3.Validate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static matrix.ArraysUtil.copyBlockToMatrix;
-import static matrix.ArraysUtil.getSubMatrix;
+import static matrix.util.ArraysUtil.copyBlockToMatrix;
+import static matrix.util.ArraysUtil.getSubMatrix;
 
 public class SquareMatrixBlockMultiplier extends SerialMultiplier {
     
@@ -28,7 +28,7 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
     public Integer[][] multiply(Integer[][] a, Integer[][] b) {
         validateSquare(a, b);
         Integer[][] result = new Integer[a.length][a.length];
-        List<MatrixMultiplyTask> tasks = fillMultiplyTasks(a, b);
+        List<MatrixMultiplyTask> tasks = generateMultiplyTasks(a, b, blockSize);
     
         processTasks(tasks);
     
@@ -47,7 +47,7 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
         }
     }
     
-    private List<MatrixMultiplyTask> fillMultiplyTasks(Integer[][] a, Integer[][] b) {
+    public List<MatrixMultiplyTask> generateMultiplyTasks(Integer[][] a, Integer[][] b, int blockSize) {
         int blocksInDimensionNum = a.length / blockSize;
         
         List<MatrixMultiplyTask> tasks = new ArrayList<>(blocksInDimensionNum * blocksInDimensionNum);

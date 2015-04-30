@@ -1,5 +1,6 @@
 package matrix;
 
+import matrix.util.MatrixUtil;
 import org.junit.Test;
 
 import java.util.Random;
@@ -41,9 +42,9 @@ public class ParallelBlockMatrixMultiplierTest {
         Integer[][] A = new Integer[size][size];
         Integer[][] B = new Integer[size][size];
         Random random = new Random();
-        randomize(A, random);
+        MatrixUtil.randomize(A, random, 100);
         System.out.println("randomized a");
-        randomize(B, random);
+        MatrixUtil.randomize(B, random, 100);
         System.out.println("randomized b");
         
         
@@ -57,11 +58,5 @@ public class ParallelBlockMatrixMultiplierTest {
         assertArrayEquals(serialResult, parallelResult);
     }
     
-    private void randomize(Integer[][] matrix, Random random) {
-        for (Integer[] col : matrix) {
-            for (int i = 0; i < col.length; i++) {
-                col[i] = random.nextInt(100);
-            }
-        }
-    }
+   
 }

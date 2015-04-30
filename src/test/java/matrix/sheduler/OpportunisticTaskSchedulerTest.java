@@ -1,4 +1,4 @@
-package sheduler;
+package matrix.sheduler;
 
 import org.junit.Test;
 

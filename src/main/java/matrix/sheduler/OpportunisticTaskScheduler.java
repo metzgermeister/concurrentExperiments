@@ -1,5 +1,6 @@
-package sheduler;
+package matrix.sheduler;
 
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -21,5 +22,11 @@ public class OpportunisticTaskScheduler<T> implements TaskScheduler<T> {
     @Override
     public T get() {
         return tasks.poll();
+    }
+    
+    @Override
+    public void submitAll(List<T> matrixMultiplyTasks) {
+        tasks.addAll(matrixMultiplyTasks);
+        
     }
 }
