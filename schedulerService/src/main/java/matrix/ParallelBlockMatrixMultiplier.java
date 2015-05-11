@@ -20,7 +20,12 @@ public class ParallelBlockMatrixMultiplier extends SquareMatrixBlockMultiplier {
         
         for (MatrixMultiplyTask task : tasks) {
             Callable<Boolean> callable = () -> {
+                long start = System.currentTimeMillis();
                 multiply(task);
+                long stop = System.currentTimeMillis();
+                System.out.println("multiplied task " + task.getA().length + "x" + task.getA()[0].length
+                        + " " + task.getB().length + "x" + task.getB()[0].length
+                        + " in " + (stop - start) + " millis");
                 return true;
             };
             callables.add(callable);

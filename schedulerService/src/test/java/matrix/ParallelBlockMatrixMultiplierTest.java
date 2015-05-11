@@ -38,7 +38,7 @@ public class ParallelBlockMatrixMultiplierTest {
     
     @Test(timeout = 60000)
     public void shouldHandleBigOne() throws Exception {
-        ParallelBlockMatrixMultiplier multiplier = new ParallelBlockMatrixMultiplier(100);
+        ParallelBlockMatrixMultiplier multiplier = new ParallelBlockMatrixMultiplier(1000);
         int size = 1000;
         Integer[][] A = new Integer[size][size];
         Integer[][] B = new Integer[size][size];

@@ -27,6 +27,10 @@ public class OpportunisticTaskScheduler<T> implements TaskScheduler<T> {
     @Override
     public void submitAll(List<T> matrixMultiplyTasks) {
         tasks.addAll(matrixMultiplyTasks);
-        
+    }
+    
+    @Override
+    public boolean hasTasks() {
+        return !tasks.isEmpty();
     }
 }

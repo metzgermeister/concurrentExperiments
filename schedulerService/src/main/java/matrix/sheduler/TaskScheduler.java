@@ -9,4 +9,6 @@ public interface TaskScheduler<T> {
     T get();
     
     void submitAll(List<T> matrixMultiplyTasks);
+    
+    boolean hasTasks();
 }

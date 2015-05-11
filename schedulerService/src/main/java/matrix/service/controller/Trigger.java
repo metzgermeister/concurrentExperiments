@@ -3,7 +3,7 @@ package matrix.service.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import matrix.sheduler.TasksContainer;
+import matrix.sheduler.ExperimentConductor;
 
 import javax.annotation.Resource;
 
@@ -11,7 +11,7 @@ import javax.annotation.Resource;
 public class Trigger {
     
     @Resource
-    TasksContainer container;
+    ExperimentConductor container;
     
     @RequestMapping(value = "/startIt", method = RequestMethod.GET)
     public String trigger() {
