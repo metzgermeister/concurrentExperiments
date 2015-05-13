@@ -1,11 +1,17 @@
 package matrix.sheduler;
 
+import concurrent.ConcurrentObjectPool;
+import concurrent.ObjectPool;
 import matrix.MatrixMultiplyTask;
 import matrix.SquareMatrixBlockMultiplier;
 import matrix.util.MatrixUtil;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import service.worker.Worker;
 
 import java.util.List;
 import java.util.Random;
@@ -14,8 +20,32 @@ import java.util.Random;
 @Component
 @Scope("singleton")
 public class ExperimentConductor {
+    private static Logger logger = Logger.getLogger(ExperimentConductor.class);
+    
     private final OpportunisticTaskScheduler<MatrixMultiplyTask> scheduler = new OpportunisticTaskScheduler<>(1000);
     private final Random random = new Random();
+    
+    private final ObjectPool<Worker> workers = new ConcurrentObjectPool<>();
+    
+    {
+        initWorkers();
+    }
+    
+    @Value("${scheduler.worker.hosts}")
+    private String[] workerHosts;
+    
+    @Value("${scheduler.worker.servicePath}")
+    private String workerServicePath;
+    
+    private void initWorkers() {
+        Validate.isTrue(workerServicePath!= null, "workerServicePath  null");
+        Validate.isTrue(ArrayUtils.isNotEmpty(workerHosts), "no hosts configured");
+        for (int i = 0; i < workerHosts.length; i++) {
+            String host = workerHosts[i];
+            int num = i + 1;
+            workers.add(new Worker(host, num));
+        }
+    }
     
     public void generateTasks(int matrixDimension, int squareSubBlockDimension) {
         Validate.isTrue(matrixDimension > 0, "negative matrix dimension passed");
@@ -36,10 +66,18 @@ public class ExperimentConductor {
     }
     
     public void startProcessing() {
+        logger.info("Starting processing. tasksCount " + scheduler.tasksCount());
         while (scheduler.hasTasks()) {
             MatrixMultiplyTask matrixMultiplyTask = scheduler.get();
-//            workers.
+            Worker worker = workers.acquire();
+            if (logger.isDebugEnabled()) {
+                logger.debug("sending task with hor. block " + matrixMultiplyTask.getHorisontalBlockNum()
+                        + " vert. block " + matrixMultiplyTask.getVerticalBlockNum() + " to worker " + worker.getDescription());
+            }
+            
+            worker.processTask(matrixMultiplyTask);
         }
+        logger.info("all tasks were processed");
     }
     
     

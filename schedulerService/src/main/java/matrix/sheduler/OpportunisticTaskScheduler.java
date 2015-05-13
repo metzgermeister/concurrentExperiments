@@ -16,7 +16,6 @@ public class OpportunisticTaskScheduler<T> implements TaskScheduler<T> {
     @Override
     public void submit(T task) {
         tasks.add(task);
-        
     }
     
     @Override
@@ -32,5 +31,10 @@ public class OpportunisticTaskScheduler<T> implements TaskScheduler<T> {
     @Override
     public boolean hasTasks() {
         return !tasks.isEmpty();
+    }
+    
+    @Override
+    public int tasksCount() {
+        return tasks.size();
     }
 }

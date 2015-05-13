@@ -11,4 +11,6 @@ public interface TaskScheduler<T> {
     void submitAll(List<T> matrixMultiplyTasks);
     
     boolean hasTasks();
+    
+    int tasksCount();
 }

@@ -6,13 +6,13 @@
     <display-name>REST api</display-name>
 
     <servlet>
-        <servlet-name>concurrentServices</servlet-name>
+        <servlet-name>schedulerServices</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>concurrentServices</servlet-name>
+        <servlet-name>schedulerServices</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 

@@ -27,9 +27,9 @@ public final class ConcurrentObjectPool<R> implements ObjectPool<R> {
     private final AtomicBoolean isOpen = new AtomicBoolean(false);
     private final AtomicBoolean isClosing = new AtomicBoolean(false);
 
-    private Set<R> acquiredResources = Collections.newSetFromMap(new ConcurrentHashMap<R, Boolean>());
+    private Set<R> acquiredResources = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-    private ConcurrentLinkedQueue<R> availableResources = new ConcurrentLinkedQueue<R>();
+    private ConcurrentLinkedQueue<R> availableResources = new ConcurrentLinkedQueue<>();
 
     @Override
     public void open() {

@@ -7,7 +7,6 @@
     <groupId>experiments</groupId>
     <artifactId>concurrentExperiments</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>war</packaging>
     <name>concurrentServices</name>
     
     
