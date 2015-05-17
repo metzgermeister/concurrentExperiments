@@ -1,7 +1,7 @@
 package service.worker;
 
 import dto.MatrixMultiplyTaskDTO;
-import matrix.MatrixMultiplyTask;
+import matrix.multiplication.task.MatrixMultiplyTask;
 import org.apache.log4j.Logger;
 import org.springframework.web.client.RestTemplate;
 

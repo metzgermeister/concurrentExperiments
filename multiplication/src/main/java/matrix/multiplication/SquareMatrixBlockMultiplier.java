@@ -1,5 +1,6 @@
-package matrix;
+package matrix.multiplication;
 
+import matrix.multiplication.task.MatrixMultiplyTask;
 import matrix.util.ArraysUtil;
 import org.apache.commons.lang3.Validate;
 
@@ -27,9 +28,9 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
         validateSquare(a, b);
         Integer[][] result = new Integer[a.length][a.length];
         List<MatrixMultiplyTask> tasks = generateMultiplyTasks(a, b, blockSize);
-    
+        
         processTasks(tasks);
-    
+        
         gatherResults(result, tasks);
         return result;
     }

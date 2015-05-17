@@ -3,8 +3,6 @@ package matrix.util;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-
 public class ArraysUtilTest {
     
     @Test(expected = IllegalArgumentException.class)
@@ -82,7 +80,7 @@ public class ArraysUtilTest {
                 {6, 7, 8},
                 {10, 11, 12},
         };
-        assertArrayEquals(B, ArraysUtil.getSubMatrix(A, 1, 1, 3, 2));
+        Assert.assertArrayEquals(B, ArraysUtil.getSubMatrix(A, 1, 1, 3, 2));
         
         Integer[][] C = {
                 {1, 2},

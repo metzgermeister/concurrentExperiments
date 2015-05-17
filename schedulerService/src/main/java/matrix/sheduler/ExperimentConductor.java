@@ -2,8 +2,8 @@ package matrix.sheduler;
 
 import concurrent.ConcurrentObjectPool;
 import concurrent.ObjectPool;
-import matrix.MatrixMultiplyTask;
-import matrix.SquareMatrixBlockMultiplier;
+import matrix.multiplication.task.MatrixMultiplyTask;
+import matrix.multiplication.SquareMatrixBlockMultiplier;
 import matrix.util.MatrixUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;

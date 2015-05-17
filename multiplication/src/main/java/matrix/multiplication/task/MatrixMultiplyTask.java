@@ -1,4 +1,4 @@
-package matrix;
+package matrix.multiplication.task;
 
 public class MatrixMultiplyTask {
     private final Integer[][] a;

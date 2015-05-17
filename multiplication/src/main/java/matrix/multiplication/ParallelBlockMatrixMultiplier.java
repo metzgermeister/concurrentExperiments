@@ -1,4 +1,6 @@
-package matrix;
+package matrix.multiplication;
+
+import matrix.multiplication.task.MatrixMultiplyTask;
 
 import java.util.ArrayList;
 import java.util.List;

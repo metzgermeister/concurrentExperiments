@@ -1,6 +1,7 @@
-package matrix;
+package matrix.multiplication;
 
 
+import matrix.multiplication.task.MatrixMultiplyTask;
 import matrix.util.ArraysUtil;
 import org.apache.commons.lang3.Validate;
 

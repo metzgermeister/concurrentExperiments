@@ -1,10 +1,10 @@
-package matrix;
+package matrix.multiplication;
 
+import matrix.multiplication.task.MatrixMultiplyTask;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
 
 public class SerialMultiplierTest {
     
@@ -19,7 +19,7 @@ public class SerialMultiplierTest {
         };
         
         Integer[][] B = {
-                {0, 0},                                         
+                {0, 0},
                 {1, 0}
         };
         

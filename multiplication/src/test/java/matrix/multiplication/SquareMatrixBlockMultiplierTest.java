@@ -1,4 +1,4 @@
-package matrix;
+package matrix.multiplication;
 
 import org.junit.Test;
 

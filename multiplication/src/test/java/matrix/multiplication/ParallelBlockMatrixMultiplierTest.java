@@ -1,4 +1,4 @@
-package matrix;
+package matrix.multiplication;
 
 import matrix.util.MatrixUtil;
 import org.junit.Assert;
@@ -56,9 +56,9 @@ public class ParallelBlockMatrixMultiplierTest {
         
         SerialMultiplier serialMultiplier = new SerialMultiplier();
         Integer[][] serialResult = serialMultiplier.multiplySerial(A, B);
-
+        
         Assert.assertArrayEquals(serialResult, parallelResult);
     }
     
-   
+    
 }
