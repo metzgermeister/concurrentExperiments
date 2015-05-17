@@ -1,8 +1,13 @@
 package matrix.service.controller;
 
+import dto.MatrixMultiplyResultDTO;
 import matrix.sheduler.ExperimentConductor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -18,8 +23,22 @@ public class Trigger {
         conductor.generateTasks(40, 20);
         conductor.initWorkers();
         conductor.startProcessing();
-        
-        return "launched";
+        return "finished, look at logs";
     }
     
+    @RequestMapping(value = "/publishResult", method = RequestMethod.POST)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String acceptResult(@RequestBody MatrixMultiplyResultDTO result) {
+//        conductor.handleResult(result);
+        return "Got it";
+    }
+    
+    
+    @RequestMapping(value = "/resultSample", method = RequestMethod.GET)
+    @ResponseBody
+    public MatrixMultiplyResultDTO resultSample() {
+        Integer[][] matrix = {{1, 2}, {3, 4}};
+        return new MatrixMultiplyResultDTO(matrix, 42, 42);
+    }
 }
