@@ -30,15 +30,8 @@ public class Trigger {
     @ResponseBody
     @ResponseStatus(HttpStatus.ACCEPTED)
     public String acceptResult(@RequestBody MatrixMultiplyResultDTO result) {
-//        conductor.handleResult(result);
+        conductor.handleResult(result);
         return "Got it";
     }
     
-    
-    @RequestMapping(value = "/resultSample", method = RequestMethod.GET)
-    @ResponseBody
-    public MatrixMultiplyResultDTO resultSample() {
-        Integer[][] matrix = {{1, 2}, {3, 4}};
-        return new MatrixMultiplyResultDTO(matrix, 42, 42);
-    }
 }

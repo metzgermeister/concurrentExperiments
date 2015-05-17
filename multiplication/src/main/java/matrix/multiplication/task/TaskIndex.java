@@ -11,6 +11,11 @@ public class TaskIndex implements Serializable {
         this.verticalBlockNum = verticalBlockNum;
     }
     
+    public TaskIndex(TaskIndex taskIndex) {
+        this.horizontalBlockNum = taskIndex.horizontalBlockNum;
+        this.verticalBlockNum = taskIndex.verticalBlockNum;
+    }
+    
     public int getHorizontalBlockNum() {
         return horizontalBlockNum;
     }
@@ -46,4 +51,5 @@ public class TaskIndex implements Serializable {
                 ", verticalBlockNum=" + verticalBlockNum +
                 '}';
     }
+    
 }
