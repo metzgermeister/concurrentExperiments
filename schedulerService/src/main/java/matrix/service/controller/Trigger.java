@@ -11,13 +11,15 @@ import javax.annotation.Resource;
 public class Trigger {
     
     @Resource
-    ExperimentConductor container;
+    ExperimentConductor conductor;
     
     @RequestMapping(value = "/startIt", method = RequestMethod.GET)
     public String trigger() {
-        container.generateTasks(40, 20);
-        container.startProcessing();
+        conductor.generateTasks(40, 20);
+        conductor.initWorkers();
+        conductor.startProcessing();
         
         return "launched";
     }
+    
 }

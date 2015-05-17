@@ -28,8 +28,9 @@ public class ExperimentConductor {
     private final ObjectPool<Worker> workers = new ConcurrentObjectPool<>();
     
     {
-        initWorkers();
+        workers.open();
     }
+    
     
     @Value("${scheduler.worker.hosts}")
     private String[] workerHosts;
@@ -37,8 +38,9 @@ public class ExperimentConductor {
     @Value("${scheduler.worker.servicePath}")
     private String workerServicePath;
     
-    private void initWorkers() {
-        Validate.isTrue(workerServicePath!= null, "workerServicePath  null");
+    public void initWorkers() {
+        
+        Validate.isTrue(workerServicePath != null, "workerServicePath  null");
         Validate.isTrue(ArrayUtils.isNotEmpty(workerHosts), "no hosts configured");
         for (int i = 0; i < workerHosts.length; i++) {
             String host = workerHosts[i];
@@ -69,7 +71,10 @@ public class ExperimentConductor {
         logger.info("Starting processing. tasksCount " + scheduler.tasksCount());
         while (scheduler.hasTasks()) {
             MatrixMultiplyTask matrixMultiplyTask = scheduler.get();
+            
+            logger.debug("acquiring worker");
             Worker worker = workers.acquire();
+            logger.debug("acquired");
             if (logger.isDebugEnabled()) {
                 logger.debug("sending task with hor. block " + matrixMultiplyTask.getHorisontalBlockNum()
                         + " vert. block " + matrixMultiplyTask.getVerticalBlockNum() + " to worker " + worker.getDescription());
@@ -79,6 +84,5 @@ public class ExperimentConductor {
         }
         logger.info("all tasks were processed");
     }
-    
     
 }

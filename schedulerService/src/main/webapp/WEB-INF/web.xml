@@ -13,7 +13,7 @@
 
     <servlet-mapping>
         <servlet-name>schedulerServices</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/schedulerServices/*</url-pattern>
     </servlet-mapping>
 
 </web-app>
