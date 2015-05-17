@@ -87,8 +87,8 @@ public class ExperimentConductor {
             Worker worker = workers.acquire();
             logger.debug("acquired");
             if (logger.isDebugEnabled()) {
-                logger.debug("sending task with hor. block " + matrixMultiplyTask.getHorizontalBlockNum()
-                        + " vert. block " + matrixMultiplyTask.getVerticalBlockNum() + " to worker " + worker.getDescription());
+                logger.debug("sending task " + matrixMultiplyTask.getIndex() + " to worker " + worker
+                        .getDescription());
             }
             
             worker.processTask(matrixMultiplyTask);

@@ -5,14 +5,14 @@ public class MatrixMultiplyTask {
     private final Integer[][] b;
     private Integer[][] result;
     private volatile boolean calculated = false;
-    final int horizontalBlockNum;
-    final int verticalBlockNum;
+    private final TaskIndex taskIndex;
     
-    public MatrixMultiplyTask(Integer[][] a, Integer[][] b, int horizontalBlockNum, int verticalBlockNum) {
+    public MatrixMultiplyTask(Integer[][] a, Integer[][] b,
+                              int horizontalBlockNum, int verticalBlockNum) {
         this.a = a;
         this.b = b;
-        this.horizontalBlockNum = horizontalBlockNum;
-        this.verticalBlockNum = verticalBlockNum;
+        
+        this.taskIndex = new TaskIndex(horizontalBlockNum, verticalBlockNum);
     }
     
     public Integer[][] getResult() {
@@ -39,11 +39,7 @@ public class MatrixMultiplyTask {
         this.result = result;
     }
     
-    public int getHorizontalBlockNum() {
-        return horizontalBlockNum;
-    }
-    
-    public int getVerticalBlockNum() {
-        return verticalBlockNum;
+    public TaskIndex getIndex() {
+        return taskIndex;
     }
 }

@@ -41,7 +41,8 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
     
     private void gatherResults(Integer[][] result, List<MatrixMultiplyTask> tasks) {
         for (MatrixMultiplyTask task : tasks) {
-            ArraysUtil.copyBlockToMatrix(result, task.getHorizontalBlockNum() * blockSize, task.getVerticalBlockNum() * blockSize,
+            ArraysUtil.copyBlockToMatrix(result, task.getIndex().getHorizontalBlockNum() * blockSize,
+                    task.getIndex().getVerticalBlockNum() * blockSize,
                     task.getResult());
         }
     }
