@@ -3,17 +3,17 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
 	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-    <display-name>scheduler</display-name>
+    <display-name>worker</display-name>
 
     <servlet>
-        <servlet-name>schedulerServices</servlet-name>
+        <servlet-name>workerService</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>schedulerServices</servlet-name>
-        <url-pattern>/schedulerServices/*</url-pattern>
+        <servlet-name>workerService</servlet-name>
+        <url-pattern>/workerService/*</url-pattern>
     </servlet-mapping>
 
 </web-app>

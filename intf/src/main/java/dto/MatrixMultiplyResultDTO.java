@@ -5,16 +5,16 @@ import java.io.Serializable;
 public class MatrixMultiplyResultDTO implements Serializable {
     
     private Integer[][] result;
-    private int horisontalBlockNum;
+    private int horizontalBlockNum;
     private int verticalBlockNum;
     
     public MatrixMultiplyResultDTO() {
     }
     
     
-    public MatrixMultiplyResultDTO(Integer[][] result, int horisontalBlockNum, int verticalBlockNum) {
+    public MatrixMultiplyResultDTO(Integer[][] result, int horizontalBlockNum, int verticalBlockNum) {
         this.result = result;
-        this.horisontalBlockNum = horisontalBlockNum;
+        this.horizontalBlockNum = horizontalBlockNum;
         this.verticalBlockNum = verticalBlockNum;
     }
     
@@ -22,8 +22,8 @@ public class MatrixMultiplyResultDTO implements Serializable {
         return result;
     }
     
-    public int getHorisontalBlockNum() {
-        return horisontalBlockNum;
+    public int getHorizontalBlockNum() {
+        return horizontalBlockNum;
     }
     
     public int getVerticalBlockNum() {
@@ -34,8 +34,8 @@ public class MatrixMultiplyResultDTO implements Serializable {
         this.result = result;
     }
     
-    public void setHorisontalBlockNum(int horisontalBlockNum) {
-        this.horisontalBlockNum = horisontalBlockNum;
+    public void setHorizontalBlockNum(int horizontalBlockNum) {
+        this.horizontalBlockNum = horizontalBlockNum;
     }
     
     public void setVerticalBlockNum(int verticalBlockNum) {
