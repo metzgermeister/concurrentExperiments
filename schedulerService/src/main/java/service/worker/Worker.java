@@ -1,11 +1,31 @@
 package service.worker;
 
+import dto.MatrixMultiplyTaskDTO;
 import matrix.MatrixMultiplyTask;
+import org.apache.log4j.Logger;
+import org.springframework.web.client.RestTemplate;
 
 public class Worker {
     
-    public void processTask(MatrixMultiplyTask matrixMultiplyTask) {
-        //TODO pivanenko implement asynchronous processing
+    private static Logger logger = Logger.getLogger(Worker.class);
+    
+    private RestTemplate restTemplate = new RestTemplate();
+    private final String url;
+    private final int number;
+    private State state = State.Idle;
+    
+    public Worker(String url, int number) {
+        this.url = url;
+        this.number = number;
+    }
+    
+    public void processTask(MatrixMultiplyTask task) {
+        logger.debug("worker number " + number + "is publishing task to " + url);
+        MatrixMultiplyTaskDTO dto = new MatrixMultiplyTaskDTO(task.getA(), task.getB(), task.getHorisontalBlockNum(),
+                task.getVerticalBlockNum());
+        restTemplate.postForObject(url, dto, String.class);
+        state = State.Busy;
+        logger.debug("worker number " + number + "published task and is busy now");
     }
     
     public enum State {
@@ -13,19 +33,8 @@ public class Worker {
         Busy
     }
     
-    private final String host;
-    private final int number;
-    
-    private State state = State.Idle;
-    
-    public Worker(String host, int number) {
-        this.host = host;
-        this.number = number;
-    }
-    
-    
     public String getDescription() {
-        return host + " " + number;
+        return "url " + url + " number " + number + " " + state;
     }
     
 }

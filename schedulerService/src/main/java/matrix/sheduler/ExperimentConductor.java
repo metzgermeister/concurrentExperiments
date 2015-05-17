@@ -31,22 +31,33 @@ public class ExperimentConductor {
         workers.open();
     }
     
-    
     @Value("${scheduler.worker.hosts}")
     private String[] workerHosts;
     
-    @Value("${scheduler.worker.servicePath}")
-    private String workerServicePath;
+    @Value("${scheduler.worker.publishTaskPath}")
+    private String workerPublishTaskPath;
+    
+    @Value("${scheduler.worker.port}")
+    private int workerPort;
     
     public void initWorkers() {
         
-        Validate.isTrue(workerServicePath != null, "workerServicePath  null");
         Validate.isTrue(ArrayUtils.isNotEmpty(workerHosts), "no hosts configured");
+        Validate.notNull(workerPublishTaskPath, "workerServicePath  null");
+        Validate.notNull(workerPort, "no worker port configured");
+        Validate.notNull(workerPort, "no worker port configured");
         for (int i = 0; i < workerHosts.length; i++) {
             String host = workerHosts[i];
             int num = i + 1;
-            workers.add(new Worker(host, num));
+            String url = composeWorkerUrl(host);
+            workers.add(new Worker(url, num));
         }
+        
+        logger.info("initialised " + workerHosts.length + " workers");
+    }
+    
+    private String composeWorkerUrl(String host) {
+        return "http://" + host + ":" + workerPort + workerPublishTaskPath;
     }
     
     public void generateTasks(int matrixDimension, int squareSubBlockDimension) {
