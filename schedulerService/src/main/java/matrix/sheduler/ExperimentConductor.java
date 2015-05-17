@@ -41,11 +41,11 @@ public class ExperimentConductor {
     private int workerPort;
     
     public void initWorkers() {
-        
         Validate.isTrue(ArrayUtils.isNotEmpty(workerHosts), "no hosts configured");
         Validate.notNull(workerPublishTaskPath, "workerServicePath  null");
         Validate.notNull(workerPort, "no worker port configured");
         Validate.notNull(workerPort, "no worker port configured");
+        
         for (int i = 0; i < workerHosts.length; i++) {
             String host = workerHosts[i];
             int num = i + 1;
@@ -72,7 +72,7 @@ public class ExperimentConductor {
         MatrixUtil.randomize(a, random, 100);
         MatrixUtil.randomize(b, random, 100);
         
-        ////TODO pivanenko  refactor SquareMatrixBlockMultiplier to split task generation and processing  
+        //TODO pivanenko  refactor SquareMatrixBlockMultiplier to split task generation and processing  
         SquareMatrixBlockMultiplier multiplier = new SquareMatrixBlockMultiplier(squareSubBlockDimension);
         List<MatrixMultiplyTask> matrixMultiplyTasks = multiplier.generateMultiplyTasks(a, b, squareSubBlockDimension);
         scheduler.submitAll(matrixMultiplyTasks);
@@ -87,7 +87,7 @@ public class ExperimentConductor {
             Worker worker = workers.acquire();
             logger.debug("acquired");
             if (logger.isDebugEnabled()) {
-                logger.debug("sending task with hor. block " + matrixMultiplyTask.getHorisontalBlockNum()
+                logger.debug("sending task with hor. block " + matrixMultiplyTask.getHorizontalBlockNum()
                         + " vert. block " + matrixMultiplyTask.getVerticalBlockNum() + " to worker " + worker.getDescription());
             }
             
