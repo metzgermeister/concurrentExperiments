@@ -70,6 +70,8 @@ public class ExperimentConductor {
         Validate.isTrue(squareSubBlockDimension > 0, "negative sub-block dimension passed");
         Validate.isTrue(matrixDimension % squareSubBlockDimension == 0, "block size " + squareSubBlockDimension + " " +
                 "is not divider of input " + "matrix dimension " + matrixDimension);
+        logger.debug("experiment for square matrices dimension=" + matrixDimension + "  and block size is " +
+                squareSubBlockDimension);
         
         Integer[][] a = new Integer[matrixDimension][matrixDimension];
         Integer[][] b = new Integer[matrixDimension][matrixDimension];
@@ -84,13 +86,15 @@ public class ExperimentConductor {
     }
     
     public void startProcessing() {
+        long start = System.currentTimeMillis();
         logger.info("Starting processing. tasksCount " + scheduler.tasksCount());
         while (scheduler.hasTasks()) {
             MatrixMultiplyTask matrixMultiplyTask = scheduler.get();
             
             processTask(matrixMultiplyTask);
         }
-        logger.info("all tasks were processed");
+        long stop = System.currentTimeMillis();
+        logger.info("all tasks were processed in " + (stop - start) + " millis");
     }
     
     private void processTask(MatrixMultiplyTask task) {
@@ -114,6 +118,7 @@ public class ExperimentConductor {
             logger.error("Can't handle result. Can't find acquired worker for task " + index);
             throw new IllegalStateException("Can't handle result. Index mismatch");
         }
+        //TODO pivanenko collect result
         worker.release();
         workersPool.release(worker);
     }

@@ -54,8 +54,10 @@ public class ParallelBlockMatrixMultiplierTest {
         long stop = System.currentTimeMillis();
         System.out.println("took " + (stop - start));
         
-        SerialMultiplier serialMultiplier = new SerialMultiplier();
-        Integer[][] serialResult = serialMultiplier.multiplySerial(A, B);
+        long serialStart = System.currentTimeMillis();
+        Integer[][] serialResult = MatrixUtil.multiplySerial(A, B);
+        long serialStop = System.currentTimeMillis();
+        System.out.println("took " + (serialStop - serialStart));
         
         Assert.assertArrayEquals(serialResult, parallelResult);
     }
