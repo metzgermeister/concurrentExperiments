@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 
 
 @Component
@@ -33,6 +34,7 @@ public class ExperimentConductor {
     private final Map<TaskIndex, Worker> workersToTaskIndex = new ConcurrentHashMap<>();
     
     private final ObjectPool<Worker> workersPool = new ConcurrentObjectPool<>();
+    private volatile CountDownLatch resultsLatch;
     
     private ConcurrentLinkedQueue<MatrixMultiplyResultDTO> results = new ConcurrentLinkedQueue<>();
     
@@ -66,11 +68,43 @@ public class ExperimentConductor {
         logger.info("initialised " + workerHosts.length + " workers");
     }
     
+    public void handleResult(MatrixMultiplyResultDTO result) {
+        TaskIndex index = new TaskIndex(result.getHorizontalBlockNum(), result.getVerticalBlockNum());
+        logger.debug("received result " + index);
+        Worker worker = workersToTaskIndex.get(index);
+        if (worker == null) {
+            logger.error("Can't handle result. Can't find acquired worker for task " + index);
+            throw new IllegalStateException("Can't handle result. Index mismatch");
+        }
+        results.add(result);
+        worker.release();
+        workersPool.release(worker);
+        resultsLatch.countDown();
+    }
+    
+    public synchronized void conductExperiment(Integer matrixDimension, Integer blockSize) {
+        long start = System.currentTimeMillis();
+        generateTasks(matrixDimension, blockSize);
+        long generated = System.currentTimeMillis();
+        startProcessing();
+        waitForResults();
+        long processed = System.currentTimeMillis();
+        Integer[][] multiplicationResult = mergeResults(matrixDimension, blockSize);
+        long finish = System.currentTimeMillis();
+        
+        logger.info("generated tasks in " + (generated - start));
+        logger.info("processed tasks in " + (processed - generated));
+        logger.info("merged results  in " + (finish - processed));
+        logger.info("total calculation time is " + (finish - generated));
+        logger.info("total time is " + (finish - start));
+//        MatrixUtil.finePrint(multiplicationResult, System.out);
+    }
+    
     private String composeWorkerUrl(String host) {
         return "http://" + host + ":" + workerPort + workerPublishTaskPath;
     }
     
-    public void generateTasks(int matrixDimension, int squareSubBlockDimension) {
+    private void generateTasks(int matrixDimension, int squareSubBlockDimension) {
         Validate.isTrue(matrixDimension > 0, "negative matrix dimension passed");
         Validate.isTrue(squareSubBlockDimension > 0, "negative sub-block dimension passed");
         Validate.isTrue(matrixDimension % squareSubBlockDimension == 0, "block size " + squareSubBlockDimension + " " +
@@ -84,8 +118,8 @@ public class ExperimentConductor {
         MatrixUtil.randomize(a, random, 100);
         MatrixUtil.randomize(b, random, 100);
         
-        MatrixUtil.finePrint(a, System.out);
-        MatrixUtil.finePrint(b, System.out);
+//        MatrixUtil.finePrint(a, System.out);
+//        MatrixUtil.finePrint(b, System.out);
         
         //TODO pivanenko  refactor SquareMatrixBlockMultiplier to split task generation and processing  
         SquareMatrixBlockMultiplier multiplier = new SquareMatrixBlockMultiplier(squareSubBlockDimension);
@@ -93,7 +127,8 @@ public class ExperimentConductor {
         scheduler.submitAll(matrixMultiplyTasks);
     }
     
-    public void startProcessing() {
+    private void startProcessing() {
+        resultsLatch = new CountDownLatch(scheduler.tasksCount());
         long start = System.currentTimeMillis();
         logger.info("Start of tasks distribution. tasksCount " + scheduler.tasksCount());
         while (scheduler.hasTasks()) {
@@ -118,20 +153,16 @@ public class ExperimentConductor {
         worker.processTask(task);
     }
     
-    public void handleResult(MatrixMultiplyResultDTO result) {
-        TaskIndex index = new TaskIndex(result.getHorizontalBlockNum(), result.getVerticalBlockNum());
-        logger.debug("received result " + index);
-        Worker worker = workersToTaskIndex.get(index);
-        if (worker == null) {
-            logger.error("Can't handle result. Can't find acquired worker for task " + index);
-            throw new IllegalStateException("Can't handle result. Index mismatch");
+    private void waitForResults() {
+        try {
+            resultsLatch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("smth went wrong");
         }
-        results.add(result);
-        worker.release();
-        workersPool.release(worker);
     }
     
-    public Integer[][] mergeResults(Integer matrixDimension, Integer blockSize) {
+    
+    private Integer[][] mergeResults(Integer matrixDimension, Integer blockSize) {
         
         Integer[][] matrix = new Integer[matrixDimension][matrixDimension];
         while (!results.isEmpty()) {
@@ -142,4 +173,6 @@ public class ExperimentConductor {
         }
         return matrix;
     }
+    
+    
 }

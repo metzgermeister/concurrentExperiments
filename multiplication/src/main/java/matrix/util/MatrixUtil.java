@@ -72,13 +72,14 @@ public final class MatrixUtil {
     }
     
     public static void finePrint(Integer[][] a, PrintStream stream) {
+        stream.println("~~~~~~~~~~~~~");
         for (Integer[] anA : a) {
             for (Integer anB : anA) {
                 stream.print(anB + " ");
             }
             stream.print("\n");
         }
-        System.out.println("~~~~~~~~~~~~~");
+        stream.println("~~~~~~~~~~~~~");
     }
     
     
