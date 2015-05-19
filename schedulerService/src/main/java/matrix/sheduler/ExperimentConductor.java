@@ -29,7 +29,7 @@ import java.util.concurrent.CountDownLatch;
 public class ExperimentConductor {
     private static Logger logger = Logger.getLogger(ExperimentConductor.class);
     
-    private final OpportunisticTaskScheduler<MatrixMultiplyTask> scheduler = new OpportunisticTaskScheduler<>(1000);
+    private OpportunisticTaskScheduler<MatrixMultiplyTask> scheduler = new OpportunisticTaskScheduler<>();
     private final Random random = new Random();
     private final Map<TaskIndex, Worker> workersToTaskIndex = new ConcurrentHashMap<>();
     
@@ -117,13 +117,14 @@ public class ExperimentConductor {
         
         MatrixUtil.randomize(a, random, 100);
         MatrixUtil.randomize(b, random, 100);
-        
+
 //        MatrixUtil.finePrint(a, System.out);
 //        MatrixUtil.finePrint(b, System.out);
         
         //TODO pivanenko  refactor SquareMatrixBlockMultiplier to split task generation and processing  
         SquareMatrixBlockMultiplier multiplier = new SquareMatrixBlockMultiplier(squareSubBlockDimension);
         List<MatrixMultiplyTask> matrixMultiplyTasks = multiplier.generateMultiplyTasks(a, b, squareSubBlockDimension);
+        scheduler.clearTasks();
         scheduler.submitAll(matrixMultiplyTasks);
     }
     

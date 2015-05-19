@@ -13,4 +13,6 @@ public interface TaskScheduler<T> {
     boolean hasTasks();
     
     int tasksCount();
+    
+    void clearTasks();
 }

@@ -2,15 +2,15 @@ package matrix.sheduler;
 
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @SuppressWarnings("unused")
 public class OpportunisticTaskScheduler<T> implements TaskScheduler<T> {
     
     private final Queue<T> tasks;
     
-    public OpportunisticTaskScheduler(int capacity) {
-        tasks = new ArrayBlockingQueue<>(capacity);
+    public OpportunisticTaskScheduler() {
+        tasks = new ConcurrentLinkedQueue<>();
     }
     
     @Override
@@ -36,5 +36,11 @@ public class OpportunisticTaskScheduler<T> implements TaskScheduler<T> {
     @Override
     public int tasksCount() {
         return tasks.size();
+    }
+    
+    @Override
+    public void clearTasks() {
+        tasks.clear();
+        
     }
 }
