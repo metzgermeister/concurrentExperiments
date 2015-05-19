@@ -37,7 +37,7 @@ public class Multiplier {
         Validate.notNull(threadCount, "thread count not set");
         multiplicationExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
         resultsPublishExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
-        logger.info("initialised multiplicationSxecutor pool with threadCount=" + threadCount);
+        logger.info("initialised multiplicationExecutor pool with threadCount=" + threadCount);
     }
     
     public void calculateTask(MatrixMultiplyTaskDTO task) {
