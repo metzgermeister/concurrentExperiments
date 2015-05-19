@@ -92,11 +92,13 @@ public class ExperimentConductor {
         Integer[][] multiplicationResult = mergeResults(matrixDimension, blockSize);
         long finish = System.currentTimeMillis();
         
-        logger.info("generated tasks in " + (generated - start));
-        logger.info("processed tasks in " + (processed - generated));
-        logger.info("merged results  in " + (finish - processed));
-        logger.info("total calculation time is " + (finish - generated));
-        logger.info("total time is " + (finish - start));
+        String experimentInfo = " experiment is for dim=" + matrixDimension + " " +
+                "blockSize=" + blockSize;
+        logger.info("generated tasks in " + (generated - start) + experimentInfo);
+        logger.info("processed tasks in " + (processed - generated) + experimentInfo);
+        logger.info("merged results  in " + (finish - processed) + experimentInfo);
+        logger.info("total calculation time is " + (finish - generated) + experimentInfo);
+        logger.info("total time is " + (finish - start) + experimentInfo);
 //        MatrixUtil.finePrint(multiplicationResult, System.out);
     }
     
