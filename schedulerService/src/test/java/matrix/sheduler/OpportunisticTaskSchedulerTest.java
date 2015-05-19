@@ -7,7 +7,7 @@ import static org.junit.Assert.assertEquals;
 public class OpportunisticTaskSchedulerTest {
     @Test
     public void shouldKeepOrder() throws Exception {
-        OpportunisticTaskScheduler<String> scheduler = new OpportunisticTaskScheduler<>(42);
+        OpportunisticTaskScheduler<String> scheduler = new OpportunisticTaskScheduler<>();
         
         String first = "first";
         String second = "second";
