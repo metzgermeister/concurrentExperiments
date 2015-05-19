@@ -59,7 +59,7 @@ public class Multiplier {
         long start = System.currentTimeMillis();
         Integer[][] result = MatrixUtil.multiplySerial(task.getA(), task.getB());
         long stop = System.currentTimeMillis();
-        System.out.println("multiplied task " + task.getA().length + "x" + task.getA()[0].length
+        logger.debug("multiplied task " + task.getA().length + "x" + task.getA()[0].length
                 + " " + task.getB().length + "x" + task.getB()[0].length
                 + " in " + (stop - start) + " millis");
         return result;
