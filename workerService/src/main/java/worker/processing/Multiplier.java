@@ -33,7 +33,7 @@ public class Multiplier {
     
     
     @PostConstruct
-    public void initialize() {
+    private void initialize() {
         Validate.notNull(threadCount, "thread count not set");
         multiplicationExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
         resultsPublishExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);

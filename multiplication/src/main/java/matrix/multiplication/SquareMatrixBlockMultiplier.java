@@ -1,7 +1,7 @@
 package matrix.multiplication;
 
 import matrix.multiplication.task.MatrixMultiplyTask;
-import matrix.util.ArraysUtil;
+import matrix.util.MatrixUtil;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
     
         private void gatherResults(Integer[][] result, List<MatrixMultiplyTask> tasks) {
         for (MatrixMultiplyTask task : tasks) {
-            ArraysUtil.copyBlockToMatrix(result, task.getIndex().getHorizontalBlockNum() * blockSize,
+            MatrixUtil.copyBlockToMatrix(result, task.getIndex().getHorizontalBlockNum() * blockSize,
                     task.getIndex().getVerticalBlockNum() * blockSize,
                     task.getResult());
         }
@@ -65,12 +65,12 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
     }
     
     private Integer[][] getHorizontalStripe(Integer[][] matrix, int verticalBlockIndex) {
-        return ArraysUtil.getSubMatrix(matrix, 0, verticalBlockIndex * blockSize, matrix[0].length,
+        return MatrixUtil.getSubMatrix(matrix, 0, verticalBlockIndex * blockSize, matrix[0].length,
                 blockSize);
     }
     
     private Integer[][] getVerticalStripe(Integer[][] matrix, int horizontalBlockIndex) {
-        return ArraysUtil.getSubMatrix(matrix, horizontalBlockIndex * blockSize, 0, blockSize, matrix.length);
+        return MatrixUtil.getSubMatrix(matrix, horizontalBlockIndex * blockSize, 0, blockSize, matrix.length);
     }
     
     

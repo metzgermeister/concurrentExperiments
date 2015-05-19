@@ -16,9 +16,9 @@ public class ArraysUtilTest {
                 {1, 2},
                 {3, 4}
         };
-        
-        
-        ArraysUtil.copyBlockToMatrix(A, 1, 0, block);
+    
+    
+        MatrixUtil.copyBlockToMatrix(A, 1, 0, block);
         
     }
     
@@ -41,7 +41,7 @@ public class ArraysUtilTest {
                 {0, 1, 2},
                 {0, 3, 4}
         };
-        ArraysUtil.copyBlockToMatrix(A, 1, 1, block);
+        MatrixUtil.copyBlockToMatrix(A, 1, 1, block);
         Assert.assertArrayEquals(B, A);
         
         
@@ -50,8 +50,8 @@ public class ArraysUtilTest {
                 {3, 4, 2},
                 {0, 3, 4}
         };
-        
-        ArraysUtil.copyBlockToMatrix(A, 0, 0, block);
+    
+        MatrixUtil.copyBlockToMatrix(A, 0, 0, block);
         Assert.assertArrayEquals(C, A);
     }
     
@@ -63,8 +63,8 @@ public class ArraysUtilTest {
                 {9, 10, 11, 12},
                 {13, 14, 15, 16}
         };
-        
-        ArraysUtil.getSubMatrix(A, 1, 1, 4, 4);
+    
+        MatrixUtil.getSubMatrix(A, 1, 1, 4, 4);
     }
     
     @Test
@@ -80,7 +80,7 @@ public class ArraysUtilTest {
                 {6, 7, 8},
                 {10, 11, 12},
         };
-        Assert.assertArrayEquals(B, ArraysUtil.getSubMatrix(A, 1, 1, 3, 2));
+        Assert.assertArrayEquals(B, MatrixUtil.getSubMatrix(A, 1, 1, 3, 2));
         
         Integer[][] C = {
                 {1, 2},
@@ -89,7 +89,7 @@ public class ArraysUtilTest {
                 {13, 14}
         };
         
-        Integer[][] subMatrix = ArraysUtil.getSubMatrix(A, 0, 0, 2, 4);
+        Integer[][] subMatrix = MatrixUtil.getSubMatrix(A, 0, 0, 2, 4);
         Assert.assertArrayEquals(C, subMatrix);
     }
     
