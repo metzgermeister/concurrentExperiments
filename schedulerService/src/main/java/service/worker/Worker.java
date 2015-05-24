@@ -12,11 +12,13 @@ public class Worker {
     private RestTemplate restTemplate = new RestTemplate();
     private final String url;
     private final int number;
+    private final int productivityIndex;
     private State state = State.Idle;
     
-    public Worker(String url, int number) {
+    public Worker(String url, int number, int productivityIndex) {
         this.url = url;
         this.number = number;
+        this.productivityIndex = productivityIndex;
     }
     
     public void processTask(MatrixMultiplyTask task) {
@@ -43,4 +45,7 @@ public class Worker {
         return "url " + url + " number " + number + " " + state;
     }
     
+    public int getProductivityIndex() {
+        return productivityIndex;
+    }
 }

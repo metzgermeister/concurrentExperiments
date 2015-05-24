@@ -1,6 +1,9 @@
 package matrix.multiplication.task;
 
-public class MatrixMultiplyTask {
+import org.apache.commons.lang3.Validate;
+import scheduler.ComplexTask;
+
+public class MatrixMultiplyTask implements ComplexTask {
     private final Integer[][] a;
     private final Integer[][] b;
     private Integer[][] result;
@@ -9,6 +12,8 @@ public class MatrixMultiplyTask {
     
     public MatrixMultiplyTask(Integer[][] a, Integer[][] b,
                               int horizontalBlockNum, int verticalBlockNum) {
+        Validate.notEmpty(a);
+        Validate.notEmpty(b);
         this.a = a;
         this.b = b;
         
@@ -41,5 +46,17 @@ public class MatrixMultiplyTask {
     
     public TaskIndex getIndex() {
         return taskIndex;
+    }
+    
+    @Override
+    /**
+     * A is  n x m      B is  m x n
+     * complexity is O(n x n x m) 
+     * each iteration is about one addition and one multiplication
+     * @see matrix.util.MatrixUtil.multiplySerial
+     */
+    public int getComplexity() {
+        
+        return a.length * a[0].length * b[0].length;
     }
 }

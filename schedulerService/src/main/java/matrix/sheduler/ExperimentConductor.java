@@ -42,8 +42,8 @@ public class ExperimentConductor {
         workersPool.open();
     }
     
-    @Value("${scheduler.worker.hosts}")
-    private String[] workerHosts;
+    @Value("${scheduler.worker.hostsAndProductivity}")
+    private String[] workerHostsAndProductivity;
     
     @Value("${scheduler.worker.publishTaskPath}")
     private String workerPublishTaskPath;
@@ -53,19 +53,21 @@ public class ExperimentConductor {
     
     @PostConstruct
     private void initWorkers() {
-        Validate.isTrue(ArrayUtils.isNotEmpty(workerHosts), "no hosts configured");
+        Validate.isTrue(ArrayUtils.isNotEmpty(workerHostsAndProductivity), "no hosts configured");
         Validate.notNull(workerPublishTaskPath, "workerServicePath  null");
         Validate.notNull(workerPort, "no worker port configured");
         Validate.notNull(workerPort, "no worker port configured");
         
-        for (int i = 0; i < workerHosts.length; i++) {
-            String host = workerHosts[i];
+        for (int i = 0; i < workerHostsAndProductivity.length; i++) {
+            String[] split = workerHostsAndProductivity[i].split(":");
+            String host =  split[0];
+            Integer productivity =  Integer.valueOf(split[1]);
             int num = i + 1;
             String url = composeWorkerUrl(host);
-            workersPool.add(new Worker(url, num));
+            workersPool.add(new Worker(url, num, productivity));
         }
         
-        logger.info("initialised " + workerHosts.length + " workers");
+        logger.info("initialised " + workerHostsAndProductivity.length + " workers");
     }
     
     public void handleResult(MatrixMultiplyResultDTO result) {
