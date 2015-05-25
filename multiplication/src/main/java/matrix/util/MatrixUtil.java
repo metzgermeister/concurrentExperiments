@@ -72,14 +72,24 @@ public final class MatrixUtil {
     }
     
     public static void finePrint(Integer[][] a, PrintStream stream) {
-        stream.println("~~~~~~~~~~~~~");
-        for (Integer[] anA : a) {
-            for (Integer anB : anA) {
-                stream.print(anB + " ");
+        stream.println("[");
+        for (int j = 0; j < a.length; j++) {
+            Integer[] anA = a[j];
+            stream.print("[");
+            for (int i = 0; i < anA.length; i++) {
+                Integer anB = anA[i];
+                stream.print(anB);
+                if (i < anA.length - 1) {
+                    stream.print(", ");
+                }
             }
-            stream.print("\n");
+            stream.print("]");
+            if (j < a.length - 1) {
+                stream.println(",");
+            }
+            stream.println("\n");
         }
-        stream.println("~~~~~~~~~~~~~");
+        stream.println("]");
     }
     
     

@@ -1,6 +1,7 @@
 package worker.controller;
 
 import dto.MatrixMultiplyTaskDTO;
+import matrix.util.MatrixUtil;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,16 @@ public class WorkerController {
         logger.debug("worker service received task hor=" + task.getHorizontalBlockNum()
                 + " vert=" + task.getVerticalBlockNum());
         multiplier.calculateTask(task);
+        return "accepted task";
+    }
+    
+    
+    @RequestMapping(value = "/publishTaskMock", method = RequestMethod.POST)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String acceptResultMock(@RequestBody MatrixMultiplyTaskDTO task) {
+        logger.debug("worker service received task hor=" + task.getHorizontalBlockNum()
+                + " vert=" + task.getVerticalBlockNum());
         return "accepted task";
     }
     
