@@ -65,5 +65,23 @@ public class MatrixUtilTest {
         String ending = ",\"horizontalBlockNum\": 42,\"verticalBlockNum\": 42}";
         stream.println(ending);
         stream.close();
+    }  
+    
+    @Test
+    public void shouldWriteResultBlock() throws Exception {
+        int aDim = 1200;
+        Integer[][] result = new Integer[aDim][aDim];
+        
+        Random random = new Random();
+        MatrixUtil.randomize(result, random, 10000);
+        PrintStream stream = new PrintStream(new FileOutputStream("/tmp/matrixResultBlock" + aDim + "x" + aDim));
+        
+        String jsonStart = "{\"result\": ";
+        stream.println(jsonStart);
+        MatrixUtil.finePrint(result, stream);
+        
+        String ending = ",\"horizontalBlockNum\": 42,\"verticalBlockNum\": 42}";
+        stream.println(ending);
+        stream.close();
     }
 }

@@ -17,6 +17,8 @@ import javax.annotation.Resource;
 @RestController
 public class ExperimentController {
     
+    private static Logger logger = Logger.getLogger(ExperimentController.class);
+    
     @Resource
     ExperimentConductor conductor;
     
@@ -32,6 +34,15 @@ public class ExperimentController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public String acceptResult(@RequestBody MatrixMultiplyResultDTO result) {
         conductor.handleResult(result);
+        return "Got it";
+    }
+    
+    @RequestMapping(value = "/publishResultMock", method = RequestMethod.POST)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String acceptResultMock(@RequestBody MatrixMultiplyResultDTO result) {
+        logger.debug("scheduler service received result hor=" + result.getHorizontalBlockNum()
+                + " vert=" + result.getVerticalBlockNum());
         return "Got it";
     }
     
