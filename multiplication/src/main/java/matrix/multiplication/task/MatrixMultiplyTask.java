@@ -9,15 +9,24 @@ public class MatrixMultiplyTask implements ComplexTask {
     private Integer[][] result;
     private volatile boolean calculated = false;
     private final TaskIndex taskIndex;
+    private final Integer priority;
+    
+    private final static Integer defaultPriority = 1;
     
     public MatrixMultiplyTask(Integer[][] a, Integer[][] b,
-                              int horizontalBlockNum, int verticalBlockNum) {
+                              int horizontalBlockNum, int verticalBlockNum, int priority) {
         Validate.notEmpty(a);
         Validate.notEmpty(b);
         this.a = a;
         this.b = b;
         
         this.taskIndex = new TaskIndex(horizontalBlockNum, verticalBlockNum);
+        this.priority = priority;
+    }
+    
+    public MatrixMultiplyTask(Integer[][] a, Integer[][] b,
+                              int horizontalBlockNum, int verticalBlockNum) {
+        this(a, b, horizontalBlockNum, verticalBlockNum, defaultPriority);
     }
     
     public Integer[][] getResult() {
@@ -55,8 +64,12 @@ public class MatrixMultiplyTask implements ComplexTask {
      * each iteration is about one addition and one multiplication
      * @see matrix.util.MatrixUtil.multiplySerial
      */
-    public int getComplexity() {
-        
+    public Integer getComplexity() {
         return a.length * a[0].length * b[0].length;
+    }
+    
+    @Override
+    public Integer getPriority() {
+        return priority;
     }
 }

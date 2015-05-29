@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,10 +23,19 @@ public class ExperimentController {
     @Resource
     ExperimentConductor conductor;
     
-    @RequestMapping(value = "/startIt/{matrixDimension}/{blockSize}", method = RequestMethod.GET)
-    public String trigger(@PathVariable("matrixDimension") Integer matrixDimension,
-                          @PathVariable("blockSize") Integer blockSize) {
-        conductor.conductExperiment(matrixDimension, blockSize);
+//    @RequestMapping(value = "/startIt/{matrixDimension}/{blockSize}", method = RequestMethod.GET)
+//    public String trigger(@PathVariable("matrixDimension") Integer matrixDimension,
+//                          @PathVariable("blockSize") Integer blockSize) {
+//        conductor.conductExperiment(matrixDimension, blockSize);
+//        return "finished, look at logs";
+//    }
+    
+    
+    @RequestMapping(value = "/twoClientsExperiment/{matrixDimension}/", method = RequestMethod.GET)
+    public String twoClientsExperiment(@PathVariable("matrixDimension") Integer matrixDimension,
+                                       @RequestParam("firstClientBlockSize") Integer firstClientBlockSize,
+                                       @RequestParam("firstClientBlockSize") Integer secondClientBlockSize) {
+        conductor.conductExperiment(matrixDimension, firstClientBlockSize, secondClientBlockSize);
         return "finished, look at logs";
     }
     

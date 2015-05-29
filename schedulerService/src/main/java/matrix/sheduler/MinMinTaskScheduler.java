@@ -1,36 +1,19 @@
 package matrix.sheduler;
 
-import java.util.List;
+import matrix.sheduler.comparators.MinMinComplexTaskComparator;
 
-public class MinMinTaskScheduler<ComplexTask> implements TaskScheduler<ComplexTask> {
+import java.util.Comparator;
+import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
+
+public class MinMinTaskScheduler<ComplexTask> extends BasicTaskScheduler<ComplexTask> {
+    private final Comparator comparator = new MinMinComplexTaskComparator();
+    private final Queue<ComplexTask> tasks = new PriorityBlockingQueue<>(42, comparator);
     
     @Override
-    public void submit(ComplexTask task) {
-        
+    protected Queue<ComplexTask> getQueue() {
+        return tasks;
     }
     
-    @Override
-    public ComplexTask get() {
-        return null;
-    }
     
-    @Override
-    public void submitAll(List<ComplexTask> matrixMultiplyTasks) {
-        
-    }
-    
-    @Override
-    public boolean hasTasks() {
-        return false;
-    }
-    
-    @Override
-    public int tasksCount() {
-        return 0;
-    }
-    
-    @Override
-    public void clearTasks() {
-        
-    }
 }

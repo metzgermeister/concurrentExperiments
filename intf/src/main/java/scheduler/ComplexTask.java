@@ -2,6 +2,8 @@ package scheduler;
 
 public interface ComplexTask {
     
-    int getComplexity();
+    Integer getComplexity();
+    
+    Integer getPriority();
     
 }

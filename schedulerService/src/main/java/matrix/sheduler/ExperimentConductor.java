@@ -29,7 +29,7 @@ import java.util.concurrent.CountDownLatch;
 public class ExperimentConductor {
     private static Logger logger = Logger.getLogger(ExperimentConductor.class);
     
-    private OpportunisticTaskScheduler<MatrixMultiplyTask> scheduler = new OpportunisticTaskScheduler<>();
+    private MinMinTaskScheduler<MatrixMultiplyTask> scheduler = new MinMinTaskScheduler<>();
     private final Random random = new Random();
     private final Map<TaskIndex, Worker> workersToTaskIndex = new ConcurrentHashMap<>();
     
@@ -60,8 +60,8 @@ public class ExperimentConductor {
         
         for (int i = 0; i < workerHostsAndProductivity.length; i++) {
             String[] split = workerHostsAndProductivity[i].split(":");
-            String host =  split[0];
-            Integer productivity =  Integer.valueOf(split[1]);
+            String host = split[0];
+            Integer productivity = Integer.valueOf(split[1]);
             int num = i + 1;
             String url = composeWorkerUrl(host);
             workersPool.add(new Worker(url, num, productivity));
@@ -84,31 +84,37 @@ public class ExperimentConductor {
         resultsLatch.countDown();
     }
     
-    public synchronized void conductExperiment(Integer matrixDimension, Integer blockSize) {
+    public synchronized void conductExperiment(Integer matrixDimension, Integer firstClientBlockSize,
+                                               Integer secondClientBlockSize) {
+        scheduler.clearTasks();
+        
         long start = System.currentTimeMillis();
-        generateTasks(matrixDimension, blockSize);
+        scheduler.submitAll(generateTasks(matrixDimension, firstClientBlockSize));
+        scheduler.submitAll(generateTasks(matrixDimension, secondClientBlockSize));
         long generated = System.currentTimeMillis();
+        
         startProcessing();
         waitForResults();
         long processed = System.currentTimeMillis();
-        Integer[][] multiplicationResult = mergeResults(matrixDimension, blockSize);
+        //TODO pivanenko distinguish results between clients and merge them
+//        Integer[][] multiplicationResult = mergeResults(matrixDimension, blockSize);
         long finish = System.currentTimeMillis();
         
         String experimentInfo = " experiment is for dim=" + matrixDimension + " " +
-                "blockSize=" + blockSize;
+                "first client blockSize=" + firstClientBlockSize +
+                " second client blockSize=" + secondClientBlockSize;
         logger.info("generated tasks in " + (generated - start) + experimentInfo);
         logger.info("processed tasks in " + (processed - generated) + experimentInfo);
         logger.info("merged results  in " + (finish - processed) + experimentInfo);
         logger.info("total calculation time is " + (finish - generated) + experimentInfo);
         logger.info("total time is " + (finish - start) + experimentInfo);
-//        MatrixUtil.finePrint(multiplicationResult, System.out);
     }
     
     private String composeWorkerUrl(String host) {
         return "http://" + host + ":" + workerPort + workerPublishTaskPath;
     }
     
-    private void generateTasks(int matrixDimension, int squareSubBlockDimension) {
+    private List<MatrixMultiplyTask> generateTasks(int matrixDimension, int squareSubBlockDimension) {
         Validate.isTrue(matrixDimension > 0, "negative matrix dimension passed");
         Validate.isTrue(squareSubBlockDimension > 0, "negative sub-block dimension passed");
         Validate.isTrue(matrixDimension % squareSubBlockDimension == 0, "block size " + squareSubBlockDimension + " " +
@@ -121,15 +127,11 @@ public class ExperimentConductor {
         
         MatrixUtil.randomize(a, random, 100);
         MatrixUtil.randomize(b, random, 100);
-
-//        MatrixUtil.finePrint(a, System.out);
-//        MatrixUtil.finePrint(b, System.out);
         
         //TODO pivanenko  refactor SquareMatrixBlockMultiplier to split task generation and processing  
         SquareMatrixBlockMultiplier multiplier = new SquareMatrixBlockMultiplier(squareSubBlockDimension);
-        List<MatrixMultiplyTask> matrixMultiplyTasks = multiplier.generateMultiplyTasks(a, b, squareSubBlockDimension);
-        scheduler.clearTasks();
-        scheduler.submitAll(matrixMultiplyTasks);
+        return multiplier.generateMultiplyTasks(a, b, squareSubBlockDimension);
+        
     }
     
     private void startProcessing() {
