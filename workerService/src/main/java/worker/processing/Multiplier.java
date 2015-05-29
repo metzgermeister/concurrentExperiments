@@ -48,7 +48,7 @@ public class Multiplier {
         future.thenAcceptAsync(matrix -> {
             logger.debug("sending result to scheduler task index is " + index);
             MatrixMultiplyResultDTO resultDTO = new MatrixMultiplyResultDTO(matrix, task.getHorizontalBlockNum(),
-                    task.getVerticalBlockNum());
+                    task.getVerticalBlockNum(), task.getClientNumber());
             restTemplate.postForObject(schedulerPublishResultUrl, resultDTO, String.class);
             logger.debug("sent result of task task " + index);
         }, resultsPublishExecutor);

@@ -1,9 +1,12 @@
 package matrix.sheduler;
 
+import org.apache.log4j.Logger;
+
 import java.util.List;
 import java.util.Queue;
 
 public abstract class BasicTaskScheduler<T> implements TaskScheduler<T> {
+    
     protected abstract Queue<T> getQueue();
     
     @Override

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import service.worker.Worker;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -72,7 +73,7 @@ public class ExperimentConductor {
     
     public void handleResult(MatrixMultiplyResultDTO result) {
         TaskIndex index = new TaskIndex(result.getHorizontalBlockNum(), result.getVerticalBlockNum());
-        logger.debug("received result " + index);
+        logger.debug("received result " + index + " for client number " + result.getClientNumber());
         Worker worker = workersToTaskIndex.get(index);
         if (worker == null) {
             logger.error("Can't handle result. Can't find acquired worker for task " + index);
@@ -89,15 +90,15 @@ public class ExperimentConductor {
         scheduler.clearTasks();
         
         long start = System.currentTimeMillis();
-        scheduler.submitAll(generateTasks(matrixDimension, firstClientBlockSize));
-        scheduler.submitAll(generateTasks(matrixDimension, secondClientBlockSize));
+        
+        scheduler.submitAll(generateTasks(matrixDimension, firstClientBlockSize, 1));
+        scheduler.submitAll(generateTasks(matrixDimension, secondClientBlockSize, 2));
         long generated = System.currentTimeMillis();
         
         startProcessing();
         waitForResults();
         long processed = System.currentTimeMillis();
-        //TODO pivanenko distinguish results between clients and merge them
-//        Integer[][] multiplicationResult = mergeResults(matrixDimension, blockSize);
+        mergeResults(matrixDimension);
         long finish = System.currentTimeMillis();
         
         String experimentInfo = " experiment is for dim=" + matrixDimension + " " +
@@ -114,7 +115,8 @@ public class ExperimentConductor {
         return "http://" + host + ":" + workerPort + workerPublishTaskPath;
     }
     
-    private List<MatrixMultiplyTask> generateTasks(int matrixDimension, int squareSubBlockDimension) {
+    private List<MatrixMultiplyTask> generateTasks(int matrixDimension, int squareSubBlockDimension,
+                                                   int clientNumber) {
         Validate.isTrue(matrixDimension > 0, "negative matrix dimension passed");
         Validate.isTrue(squareSubBlockDimension > 0, "negative sub-block dimension passed");
         Validate.isTrue(matrixDimension % squareSubBlockDimension == 0, "block size " + squareSubBlockDimension + " " +
@@ -130,21 +132,22 @@ public class ExperimentConductor {
         
         //TODO pivanenko  refactor SquareMatrixBlockMultiplier to split task generation and processing  
         SquareMatrixBlockMultiplier multiplier = new SquareMatrixBlockMultiplier(squareSubBlockDimension);
-        return multiplier.generateMultiplyTasks(a, b, squareSubBlockDimension);
+        return multiplier.generateMultiplyTasks(a, b, squareSubBlockDimension, clientNumber);
         
     }
     
     private void startProcessing() {
         resultsLatch = new CountDownLatch(scheduler.tasksCount());
         long start = System.currentTimeMillis();
-        logger.info("Start of tasks distribution. tasksCount " + scheduler.tasksCount());
+        logger.debug("Start of tasks distribution. tasksCount " + scheduler.tasksCount());
         while (scheduler.hasTasks()) {
             MatrixMultiplyTask matrixMultiplyTask = scheduler.get();
-            
+            logger.debug("scheduler gave task client=" + matrixMultiplyTask.getClientNumber()
+                    + " index " + matrixMultiplyTask.getIndex());
             processTask(matrixMultiplyTask);
         }
         long stop = System.currentTimeMillis();
-        logger.info("all tasks were sent for processing in " + (stop - start) + " millis");
+        logger.debug("all tasks were sent for processing in " + (stop - start) + " millis");
     }
     
     private void processTask(MatrixMultiplyTask task) {
@@ -169,16 +172,28 @@ public class ExperimentConductor {
     }
     
     
-    private Integer[][] mergeResults(Integer matrixDimension, Integer blockSize) {
+    private Map<Integer, Integer[][]> mergeResults(Integer matrixDimension) {
+        Map<Integer, Integer[][]> resultsByClientId = new HashMap<>();
         
-        Integer[][] matrix = new Integer[matrixDimension][matrixDimension];
+        
         while (!results.isEmpty()) {
             MatrixMultiplyResultDTO result = results.poll();
-            MatrixUtil.copyBlockToMatrix(matrix, result.getHorizontalBlockNum() * blockSize,
+            int clientNumber = result.getClientNumber();
+            Integer[][] matrixToWriteResult;
+            if (resultsByClientId.containsKey(clientNumber)) {
+                matrixToWriteResult = resultsByClientId.get(clientNumber);
+            } else {
+                matrixToWriteResult = new Integer[matrixDimension][matrixDimension];
+                resultsByClientId.put(clientNumber, matrixToWriteResult);
+            }
+            Validate.noNullElements(result.getResult());
+            Integer blockSize = Math.min(result.getResult().length, result.getResult()[0].length);
+            
+            MatrixUtil.copyBlockToMatrix(matrixToWriteResult, result.getHorizontalBlockNum() * blockSize,
                     result.getVerticalBlockNum() * blockSize,
                     result.getResult());
         }
-        return matrix;
+        return resultsByClientId;
     }
     
     

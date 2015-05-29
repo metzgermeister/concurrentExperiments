@@ -27,7 +27,7 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
     public Integer[][] multiply(Integer[][] a, Integer[][] b) {
         validateSquare(a, b);
         Integer[][] result = new Integer[a.length][a.length];
-        List<MatrixMultiplyTask> tasks = generateMultiplyTasks(a, b, blockSize);
+        List<MatrixMultiplyTask> tasks = generateMultiplyTasks(a, b, blockSize, 42);
         
         processTasks(tasks);
         
@@ -47,7 +47,8 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
         }
     }
     
-    public List<MatrixMultiplyTask> generateMultiplyTasks(Integer[][] a, Integer[][] b, int blockSize) {
+    public List<MatrixMultiplyTask> generateMultiplyTasks(Integer[][] a, Integer[][] b, int blockSize, int 
+            clientNumber) {
         int blocksInDimensionNum = a.length / blockSize;
         
         List<MatrixMultiplyTask> tasks = new ArrayList<>(blocksInDimensionNum * blocksInDimensionNum);
@@ -57,7 +58,7 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
             for (int j = 0; j < blocksInDimensionNum; j++) {
                 Integer[][] horizontalStripe = getHorizontalStripe(a, j);
                 Integer[][] verticalStripe = getVerticalStripe(b, i);
-                MatrixMultiplyTask task = new MatrixMultiplyTask(horizontalStripe, verticalStripe, i, j);
+                MatrixMultiplyTask task = new MatrixMultiplyTask(horizontalStripe, verticalStripe, i, j, clientNumber);
                 tasks.add(task);
             }
         }

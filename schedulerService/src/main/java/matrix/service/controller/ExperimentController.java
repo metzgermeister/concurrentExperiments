@@ -2,6 +2,7 @@ package matrix.service.controller;
 
 import dto.MatrixMultiplyResultDTO;
 import matrix.sheduler.ExperimentConductor;
+import org.apache.commons.lang3.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +23,7 @@ public class ExperimentController {
     
     @Resource
     ExperimentConductor conductor;
-    
+
 //    @RequestMapping(value = "/startIt/{matrixDimension}/{blockSize}", method = RequestMethod.GET)
 //    public String trigger(@PathVariable("matrixDimension") Integer matrixDimension,
 //                          @PathVariable("blockSize") Integer blockSize) {
@@ -31,10 +32,12 @@ public class ExperimentController {
 //    }
     
     
-    @RequestMapping(value = "/twoClientsExperiment/{matrixDimension}/", method = RequestMethod.GET)
+    @RequestMapping(value = "/twoClientsExperiment/{matrixDimension}", method = RequestMethod.GET)
     public String twoClientsExperiment(@PathVariable("matrixDimension") Integer matrixDimension,
                                        @RequestParam("firstClientBlockSize") Integer firstClientBlockSize,
-                                       @RequestParam("firstClientBlockSize") Integer secondClientBlockSize) {
+                                       @RequestParam("secondClientBlockSize") Integer secondClientBlockSize) {
+        Validate.notNull(firstClientBlockSize, "missing firstClientBlockSize parameter");
+        Validate.notNull(secondClientBlockSize, "missing secondClientBlockSize parameter");
         conductor.conductExperiment(matrixDimension, firstClientBlockSize, secondClientBlockSize);
         return "finished, look at logs";
     }

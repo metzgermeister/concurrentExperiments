@@ -12,21 +12,24 @@ public class MatrixMultiplyTask implements ComplexTask {
     private final Integer priority;
     
     private final static Integer defaultPriority = 1;
+    private int clientNumber;
     
     public MatrixMultiplyTask(Integer[][] a, Integer[][] b,
-                              int horizontalBlockNum, int verticalBlockNum, int priority) {
+                              int horizontalBlockNum, int verticalBlockNum,
+                              int priority, int clientNumber) {
         Validate.notEmpty(a);
         Validate.notEmpty(b);
         this.a = a;
         this.b = b;
         
         this.taskIndex = new TaskIndex(horizontalBlockNum, verticalBlockNum);
+        this.clientNumber = clientNumber;
         this.priority = priority;
     }
     
     public MatrixMultiplyTask(Integer[][] a, Integer[][] b,
-                              int horizontalBlockNum, int verticalBlockNum) {
-        this(a, b, horizontalBlockNum, verticalBlockNum, defaultPriority);
+                              int horizontalBlockNum, int verticalBlockNum, int clientNumber) {
+        this(a, b, horizontalBlockNum, verticalBlockNum, defaultPriority, clientNumber);
     }
     
     public Integer[][] getResult() {
@@ -71,5 +74,13 @@ public class MatrixMultiplyTask implements ComplexTask {
     @Override
     public Integer getPriority() {
         return priority;
+    }
+    
+    public int getClientNumber() {
+        return clientNumber;
+    }
+    
+    public void setClientNumber(int clientNumber) {
+        this.clientNumber = clientNumber;
     }
 }

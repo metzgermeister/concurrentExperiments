@@ -25,7 +25,8 @@ public class Worker {
         logger.debug("worker number " + number + " is publishing task to " + url);
         MatrixMultiplyTaskDTO dto = new MatrixMultiplyTaskDTO(task.getA(), task.getB(),
                 task.getIndex().getHorizontalBlockNum(),
-                task.getIndex().getVerticalBlockNum());
+                task.getIndex().getVerticalBlockNum(),
+                task.getClientNumber());
         restTemplate.postForObject(url, dto, String.class);
         state = State.Busy;
         logger.debug("worker number " + number + " published task and is busy now");

@@ -7,15 +7,17 @@ public class MatrixMultiplyResultDTO implements Serializable {
     private Integer[][] result;
     private int horizontalBlockNum;
     private int verticalBlockNum;
+    private int clientNumber;
     
     public MatrixMultiplyResultDTO() {
     }
     
     
-    public MatrixMultiplyResultDTO(Integer[][] result, int horizontalBlockNum, int verticalBlockNum) {
+    public MatrixMultiplyResultDTO(Integer[][] result, int horizontalBlockNum, int verticalBlockNum, int clientNumber) {
         this.result = result;
         this.horizontalBlockNum = horizontalBlockNum;
         this.verticalBlockNum = verticalBlockNum;
+        this.clientNumber = clientNumber;
     }
     
     public Integer[][] getResult() {
@@ -41,4 +43,9 @@ public class MatrixMultiplyResultDTO implements Serializable {
     public void setVerticalBlockNum(int verticalBlockNum) {
         this.verticalBlockNum = verticalBlockNum;
     }
+    
+    public int getClientNumber() {
+        return clientNumber;
+    }
+    
 }
