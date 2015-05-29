@@ -1,4 +1,4 @@
-package matrix.service.controller;
+package worker.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -9,6 +9,6 @@ public class HelloController {
     
     @RequestMapping(value = "/hello", method = RequestMethod.GET)
     public String printWelcome() {
-        return "hello from Scheduler!";
+        return "hello from Worker!";
     }
 }
