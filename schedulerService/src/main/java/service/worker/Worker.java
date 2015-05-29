@@ -46,7 +46,7 @@ public class Worker {
         return "url " + url + " number " + number + " " + state;
     }
     
-    public int getProductivityIndex() {
+    public Integer getProductivityIndex() {
         return productivityIndex;
     }
 }

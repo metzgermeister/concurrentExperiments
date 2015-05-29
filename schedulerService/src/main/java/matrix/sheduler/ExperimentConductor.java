@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import service.worker.MaxProductivityWorkerComparator;
 import service.worker.Worker;
 
 import javax.annotation.PostConstruct;
@@ -34,7 +35,7 @@ public class ExperimentConductor {
     private final Random random = new Random();
     private final Map<TaskIndex, Worker> workersToTaskIndex = new ConcurrentHashMap<>();
     
-    private final ObjectPool<Worker> workersPool = new ConcurrentObjectPool<>();
+    private final ObjectPool<Worker> workersPool = new ConcurrentObjectPool<>(new MaxProductivityWorkerComparator());
     private volatile CountDownLatch resultsLatch;
     
     private ConcurrentLinkedQueue<MatrixMultiplyResultDTO> results = new ConcurrentLinkedQueue<>();
@@ -59,6 +60,7 @@ public class ExperimentConductor {
         Validate.notNull(workerPort, "no worker port configured");
         Validate.notNull(workerPort, "no worker port configured");
         
+        //TODO pivanenko add workers count parameter instead of copy-pasting in properties file
         for (int i = 0; i < workerHostsAndProductivity.length; i++) {
             String[] split = workerHostsAndProductivity[i].split(":");
             String host = split[0];
@@ -82,6 +84,7 @@ public class ExperimentConductor {
         results.add(result);
         worker.release();
         workersPool.release(worker);
+        logger.debug("released worker " + worker.getDescription());
         resultsLatch.countDown();
     }
     
@@ -141,10 +144,10 @@ public class ExperimentConductor {
         long start = System.currentTimeMillis();
         logger.debug("Start of tasks distribution. tasksCount " + scheduler.tasksCount());
         while (scheduler.hasTasks()) {
-            MatrixMultiplyTask matrixMultiplyTask = scheduler.get();
-            logger.debug("scheduler gave task client=" + matrixMultiplyTask.getClientNumber()
-                    + " index " + matrixMultiplyTask.getIndex());
-            processTask(matrixMultiplyTask);
+            MatrixMultiplyTask task = scheduler.get();
+            logger.debug("scheduler gave task client=" + task.getClientNumber()
+                    + " index " + task.getIndex() + " complexity is " + task.getComplexity());
+            processTask(task);
         }
         long stop = System.currentTimeMillis();
         logger.debug("all tasks were sent for processing in " + (stop - start) + " millis");
@@ -154,7 +157,7 @@ public class ExperimentConductor {
         logger.debug("acquiring worker");
         Worker worker = workersPool.acquire();
         workersToTaskIndex.put(new TaskIndex(task.getIndex()), worker);
-        logger.debug("acquired");
+        logger.debug("acquired worker " + worker.getDescription() + " productivity=" + worker.getProductivityIndex());
         if (logger.isDebugEnabled()) {
             logger.debug("sending task " + task.getIndex() + " to worker " + worker
                     .getDescription());
