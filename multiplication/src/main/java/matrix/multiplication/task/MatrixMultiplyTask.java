@@ -22,7 +22,7 @@ public class MatrixMultiplyTask implements ComplexTask {
         this.a = a;
         this.b = b;
         
-        this.taskIndex = new TaskIndex(horizontalBlockNum, verticalBlockNum);
+        this.taskIndex = new TaskIndex(horizontalBlockNum, verticalBlockNum, clientNumber);
         this.clientNumber = clientNumber;
         this.priority = priority;
     }

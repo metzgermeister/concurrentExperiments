@@ -41,7 +41,7 @@ public class Multiplier {
     }
     
     public void calculateTask(MatrixMultiplyTaskDTO task) {
-        final TaskIndex index = new TaskIndex(task.getHorizontalBlockNum(), task.getVerticalBlockNum());
+        final TaskIndex index = new TaskIndex(task.getHorizontalBlockNum(), task.getVerticalBlockNum(), task.getClientNumber());
         final CompletableFuture<Integer[][]> future =
                 CompletableFuture.supplyAsync(() -> multiplyWithLogging(task), multiplicationExecutor);
         

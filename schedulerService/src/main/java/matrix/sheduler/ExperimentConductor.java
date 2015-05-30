@@ -74,7 +74,7 @@ public class ExperimentConductor {
     }
     
     public void handleResult(MatrixMultiplyResultDTO result) {
-        TaskIndex index = new TaskIndex(result.getHorizontalBlockNum(), result.getVerticalBlockNum());
+        TaskIndex index = new TaskIndex(result.getHorizontalBlockNum(), result.getVerticalBlockNum(), result.getClientNumber());
         logger.debug("received result " + index + " for client number " + result.getClientNumber());
         Worker worker = workersToTaskIndex.get(index);
         if (worker == null) {
