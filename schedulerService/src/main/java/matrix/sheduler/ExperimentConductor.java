@@ -1,6 +1,5 @@
 package matrix.sheduler;
 
-import concurrent.ConcurrentObjectPool;
 import concurrent.ObjectPool;
 import dto.MatrixMultiplyResultDTO;
 import matrix.multiplication.SquareMatrixBlockMultiplier;
@@ -11,9 +10,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-import service.worker.MaxProductivityWorkerComparator;
 import service.worker.Worker;
 
 import javax.annotation.PostConstruct;
@@ -29,24 +25,25 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 
-@Component
-@Scope("singleton")
 public class ExperimentConductor {
     private static Logger logger = Logger.getLogger(ExperimentConductor.class);
     
-    private MinMinTaskScheduler<MatrixMultiplyTask> scheduler = new MinMinTaskScheduler<>();
-    private final Random random = new Random();
-    private final Map<TaskIndex, Worker> workersToTaskIndex = new ConcurrentHashMap<>();
+    private final BasicTaskScheduler<MatrixMultiplyTask> scheduler;
     
-    private final ObjectPool<Worker> workersPool = new ConcurrentObjectPool<>(new MaxProductivityWorkerComparator());
+    private final ObjectPool<Worker> workersPool;
+    private final Random random = new Random();
+    private final ConcurrentLinkedQueue<MatrixMultiplyResultDTO> results = new ConcurrentLinkedQueue<>();
+    private final Map<TaskIndex, Worker> tasksAssignedToWorkers = new ConcurrentHashMap<>();
+    
     private Executor sendersPool;
     private volatile CountDownLatch resultsLatch;
     
-    private ConcurrentLinkedQueue<MatrixMultiplyResultDTO> results = new ConcurrentLinkedQueue<>();
-    
-    {
-        workersPool.open();
+    public ExperimentConductor(BasicTaskScheduler<MatrixMultiplyTask> scheduler, ObjectPool<Worker> workersPool) {
+        this.scheduler = scheduler;
+        this.workersPool = workersPool;
+        this.workersPool.open();
     }
+    
     
     @Value("${scheduler.worker.hostsAndProductivity}")
     private String[] workerHostsAndProductivity;
@@ -85,7 +82,7 @@ public class ExperimentConductor {
     public void handleResult(MatrixMultiplyResultDTO result) {
         TaskIndex index = new TaskIndex(result.getHorizontalBlockNum(), result.getVerticalBlockNum(), result.getClientNumber());
         logger.debug("received result " + index + " for client number " + result.getClientNumber());
-        Worker worker = workersToTaskIndex.get(index);
+        Worker worker = tasksAssignedToWorkers.get(index);
         if (worker == null) {
             logger.error("Can't handle result. Can't find acquired worker for task " + index);
             throw new IllegalStateException("Can't handle result. Index mismatch");
@@ -168,7 +165,7 @@ public class ExperimentConductor {
     private void sendTaskForProcessing(MatrixMultiplyTask task) {
         logger.debug("acquiring worker");
         Worker worker = workersPool.acquire();
-        workersToTaskIndex.put(new TaskIndex(task.getIndex()), worker);
+        tasksAssignedToWorkers.put(new TaskIndex(task.getIndex()), worker);
         logger.debug("acquired worker " + worker.getDescription() + " productivity=" + worker.getProductivityIndex());
         if (logger.isDebugEnabled()) {
             logger.debug("sending task " + task.getIndex() + " to worker " + worker

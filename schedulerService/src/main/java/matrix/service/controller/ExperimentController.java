@@ -21,16 +21,9 @@ public class ExperimentController {
     
     private static Logger logger = Logger.getLogger(ExperimentController.class);
     
-    @Resource
+    @Resource(name = "minMinConductor")
     ExperimentConductor conductor;
 
-//    @RequestMapping(value = "/startIt/{matrixDimension}/{blockSize}", method = RequestMethod.GET)
-//    public String trigger(@PathVariable("matrixDimension") Integer matrixDimension,
-//                          @PathVariable("blockSize") Integer blockSize) {
-//        conductor.conductExperiment(matrixDimension, blockSize);
-//        return "finished, look at logs";
-//    }
-    
     
     @RequestMapping(value = "/twoClientsExperiment/{matrixDimension}", method = RequestMethod.GET)
     public String twoClientsExperiment(@PathVariable("matrixDimension") Integer matrixDimension,
