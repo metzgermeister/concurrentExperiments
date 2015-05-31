@@ -21,9 +21,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 @Component
@@ -36,6 +39,7 @@ public class ExperimentConductor {
     private final Map<TaskIndex, Worker> workersToTaskIndex = new ConcurrentHashMap<>();
     
     private final ObjectPool<Worker> workersPool = new ConcurrentObjectPool<>(new MaxProductivityWorkerComparator());
+    private Executor sendersPool;
     private volatile CountDownLatch resultsLatch;
     
     private ConcurrentLinkedQueue<MatrixMultiplyResultDTO> results = new ConcurrentLinkedQueue<>();
@@ -54,6 +58,11 @@ public class ExperimentConductor {
     private int workerPort;
     
     @PostConstruct
+    private void init() {
+        initWorkers();
+        sendersPool = Executors.newFixedThreadPool(workerHostsAndProductivity.length);
+    }
+    
     private void initWorkers() {
         Validate.isTrue(ArrayUtils.isNotEmpty(workerHostsAndProductivity), "no hosts configured");
         Validate.notNull(workerPublishTaskPath, "workerServicePath  null");
@@ -143,17 +152,20 @@ public class ExperimentConductor {
         resultsLatch = new CountDownLatch(scheduler.tasksCount());
         long start = System.currentTimeMillis();
         logger.debug("Start of tasks distribution. tasksCount " + scheduler.tasksCount());
+        
         while (scheduler.hasTasks()) {
             MatrixMultiplyTask task = scheduler.get();
             logger.debug("scheduler gave task client=" + task.getClientNumber()
                     + " index " + task.getIndex() + " complexity is " + task.getComplexity());
-            processTask(task);
+            
+            CompletableFuture.runAsync(() -> sendTaskForProcessing(task), sendersPool);
         }
         long stop = System.currentTimeMillis();
         logger.debug("all tasks were sent for processing in " + (stop - start) + " millis");
     }
     
-    private void processTask(MatrixMultiplyTask task) {
+    //TODO pivanenko extract task sender
+    private void sendTaskForProcessing(MatrixMultiplyTask task) {
         logger.debug("acquiring worker");
         Worker worker = workersPool.acquire();
         workersToTaskIndex.put(new TaskIndex(task.getIndex()), worker);
@@ -170,7 +182,7 @@ public class ExperimentConductor {
         try {
             resultsLatch.await();
         } catch (InterruptedException e) {
-            throw new RuntimeException("smth went wrong");
+            throw new RuntimeException("something went wrong");
         }
     }
     

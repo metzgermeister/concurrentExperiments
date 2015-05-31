@@ -13,8 +13,8 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 @Component
 @Scope("singleton")
@@ -27,16 +27,16 @@ public class Multiplier {
     @Value("${scheduler.publishResultUrl}")
     private String schedulerPublishResultUrl;
     
-    private ThreadPoolExecutor multiplicationExecutor;
-    private ThreadPoolExecutor resultsPublishExecutor;
+    private Executor multiplicationExecutor;
+    private Executor resultsPublishExecutor;
     private RestTemplate restTemplate = new RestTemplate();
     
     
     @PostConstruct
     private void initialize() {
         Validate.notNull(threadCount, "thread count not set");
-        multiplicationExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
-        resultsPublishExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
+        multiplicationExecutor = Executors.newFixedThreadPool(threadCount);
+        resultsPublishExecutor = Executors.newFixedThreadPool(threadCount);
         logger.info("initialised multiplicationExecutor pool with threadCount=" + threadCount);
     }
     
