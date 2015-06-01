@@ -1,7 +1,6 @@
 package worker.controller;
 
 import dto.MatrixMultiplyTaskDTO;
-import matrix.util.MatrixUtil;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;

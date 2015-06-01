@@ -8,8 +8,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MinMinComplexTaskComparatorTest {
-    private final MinMinComplexTaskComparator comparator = new MinMinComplexTaskComparator();
+public class MaxComplexityFirstTaskComparatorTest {
+    
+    private final MaxComplexityFirstTaskComparator comparator = new MaxComplexityFirstTaskComparator();
     
     class ComplexTaskImpl implements ComplexTask {
         private final Integer priority;
@@ -41,9 +42,9 @@ public class MinMinComplexTaskComparatorTest {
         tasks.add(smallTask);
         
         Collections.sort(tasks, comparator);
-        
-        Assert.assertSame(smallTask, tasks.get(0));
-        Assert.assertSame(bigTask, tasks.get(1));
+    
+        Assert.assertSame(bigTask, tasks.get(0));
+        Assert.assertSame(smallTask, tasks.get(1));
     }
     
     
@@ -72,7 +73,8 @@ public class MinMinComplexTaskComparatorTest {
         
         Collections.sort(tasks, comparator);
         
-        Assert.assertSame(smallLowPriorityTask, tasks.get(0));
-        Assert.assertSame(bigHighPriorityTask, tasks.get(1));
+        Assert.assertSame(smallLowPriorityTask, tasks.get(1));
+        Assert.assertSame(bigHighPriorityTask, tasks.get(0));
     }
+    
 }
