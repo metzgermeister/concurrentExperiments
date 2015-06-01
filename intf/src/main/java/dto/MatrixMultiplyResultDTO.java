@@ -3,6 +3,7 @@ package dto;
 import java.io.Serializable;
 
 public class MatrixMultiplyResultDTO implements Serializable {
+    private ExperimentStrategy strategy;
     
     private Integer[][] result;
     private int horizontalBlockNum;
@@ -13,11 +14,13 @@ public class MatrixMultiplyResultDTO implements Serializable {
     }
     
     
-    public MatrixMultiplyResultDTO(Integer[][] result, int horizontalBlockNum, int verticalBlockNum, int clientNumber) {
+    public MatrixMultiplyResultDTO(Integer[][] result, int horizontalBlockNum, int verticalBlockNum,
+                                   int clientNumber, ExperimentStrategy strategy) {
         this.result = result;
         this.horizontalBlockNum = horizontalBlockNum;
         this.verticalBlockNum = verticalBlockNum;
         this.clientNumber = clientNumber;
+        this.strategy = strategy;
     }
     
     public Integer[][] getResult() {
@@ -48,4 +51,15 @@ public class MatrixMultiplyResultDTO implements Serializable {
         return clientNumber;
     }
     
+    public ExperimentStrategy getStrategy() {
+        return strategy;
+    }
+    
+    public void setStrategy(ExperimentStrategy strategy) {
+        this.strategy = strategy;
+    }
+    
+    public void setClientNumber(int clientNumber) {
+        this.clientNumber = clientNumber;
+    }
 }

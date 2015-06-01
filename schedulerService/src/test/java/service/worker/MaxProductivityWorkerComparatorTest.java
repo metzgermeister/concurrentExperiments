@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class MaxProductivityWorkerComparatorTest {
+   
     @Test
     public void shouldPutProductiveWorkerFirst() throws Exception {
         MaxProductivityWorkerComparator comparator = new MaxProductivityWorkerComparator();
@@ -25,7 +26,6 @@ public class MaxProductivityWorkerComparatorTest {
         
         Assert.assertSame(strongWorker, workers.get(0));
         Assert.assertSame(weakWorker, workers.get(1));
-        
     }
     
     @Test

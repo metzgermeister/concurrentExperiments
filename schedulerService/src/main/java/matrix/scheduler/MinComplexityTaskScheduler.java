@@ -1,6 +1,6 @@
-package matrix.sheduler;
+package matrix.scheduler;
 
-import matrix.sheduler.comparators.MinMinComplexTaskComparator;
+import matrix.scheduler.comparators.MinMinComplexTaskComparator;
 
 import java.util.Comparator;
 import java.util.Queue;

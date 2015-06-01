@@ -1,5 +1,6 @@
 package matrix.multiplication;
 
+import dto.ExperimentStrategy;
 import matrix.multiplication.task.MatrixMultiplyTask;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,12 +37,13 @@ public class SerialMultiplierTest {
         
         int irrelevant = 42;
         
-        MatrixMultiplyTask task = new MatrixMultiplyTask(A, B, irrelevant, irrelevant, irrelevant);
+        ExperimentStrategy irrelevantStrategy = ExperimentStrategy.MINMIN;
+        MatrixMultiplyTask task = new MatrixMultiplyTask(A, B, irrelevant, irrelevant, irrelevant, irrelevantStrategy);
         serialMultiplier.multiply(task);
         Assert.assertTrue(task.isCalculated());
         assertArrayEquals(C, task.getResult());
         
-        MatrixMultiplyTask secondTask = new MatrixMultiplyTask(B, A, irrelevant, irrelevant, irrelevant);
+        MatrixMultiplyTask secondTask = new MatrixMultiplyTask(B, A, irrelevant, irrelevant, irrelevant, irrelevantStrategy);
         serialMultiplier.multiply(secondTask);
         Assert.assertTrue(secondTask.isCalculated());
         assertArrayEquals(D, secondTask.getResult());

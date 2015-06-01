@@ -13,16 +13,29 @@
     <mvc:annotation-driven/>
     
     <bean name="maxProductivityWorkerComparator" class="service.worker.MaxProductivityWorkerComparator"/>
+    <bean name="minProductivityWorkerComparator" class="service.worker.MinProductivityWorkerComparator"/>
     
-    <bean name="minComplexityTaskScheduler" class="matrix.sheduler.MinComplexityTaskScheduler"/>
+    <bean name="minComplexityTaskScheduler4MinMin" class="matrix.scheduler.MinComplexityTaskScheduler"/>
+    <bean name="minComplexityTaskScheduler4MinMax" class="matrix.scheduler.MinComplexityTaskScheduler"/>
+    
     <bean name="maxProductivityWorkersPool" class="concurrent.ConcurrentObjectPool">
         <constructor-arg ref="maxProductivityWorkerComparator"/>
     </bean>
-    
-    
-    <bean name="minMinConductor" class="matrix.sheduler.ExperimentConductor">
-        <constructor-arg ref="minComplexityTaskScheduler"/>
-        <constructor-arg ref="maxProductivityWorkersPool"/>
+    <bean name="minProductivityWorkersPool" class="concurrent.ConcurrentObjectPool">
+        <constructor-arg ref="minProductivityWorkerComparator"/>
     </bean>
     
+    
+    <bean name="minMinConductor" class="matrix.scheduler.ExperimentConductor">
+        <constructor-arg ref="minComplexityTaskScheduler4MinMin"/>
+        <constructor-arg ref="maxProductivityWorkersPool"/>
+        <constructor-arg value="MINMIN"/>
+    </bean>
+    
+    <bean name="minMaxConductor" class="matrix.scheduler.ExperimentConductor">
+        <constructor-arg ref="minComplexityTaskScheduler4MinMax"/>
+        <constructor-arg ref="minProductivityWorkersPool"/>
+        <constructor-arg value="MINMAX"/>
+    </bean>
+
 </beans>

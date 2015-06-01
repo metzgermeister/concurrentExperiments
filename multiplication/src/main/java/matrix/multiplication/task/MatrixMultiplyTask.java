@@ -1,5 +1,6 @@
 package matrix.multiplication.task;
 
+import dto.ExperimentStrategy;
 import org.apache.commons.lang3.Validate;
 import scheduler.ComplexTask;
 
@@ -13,10 +14,12 @@ public class MatrixMultiplyTask implements ComplexTask {
     
     private final static Integer defaultPriority = 1;
     private int clientNumber;
+    private ExperimentStrategy experimentStrategy;
     
     public MatrixMultiplyTask(Integer[][] a, Integer[][] b,
                               int horizontalBlockNum, int verticalBlockNum,
-                              int priority, int clientNumber) {
+                              int priority, int clientNumber, ExperimentStrategy experimentStrategy) {
+        this.experimentStrategy = experimentStrategy;
         Validate.notEmpty(a);
         Validate.notEmpty(b);
         this.a = a;
@@ -28,8 +31,9 @@ public class MatrixMultiplyTask implements ComplexTask {
     }
     
     public MatrixMultiplyTask(Integer[][] a, Integer[][] b,
-                              int horizontalBlockNum, int verticalBlockNum, int clientNumber) {
-        this(a, b, horizontalBlockNum, verticalBlockNum, defaultPriority, clientNumber);
+                              int horizontalBlockNum, int verticalBlockNum, int clientNumber,
+                              ExperimentStrategy experimentStrategy) {
+        this(a, b, horizontalBlockNum, verticalBlockNum, defaultPriority, clientNumber, experimentStrategy);
     }
     
     public Integer[][] getResult() {
@@ -82,5 +86,13 @@ public class MatrixMultiplyTask implements ComplexTask {
     
     public void setClientNumber(int clientNumber) {
         this.clientNumber = clientNumber;
+    }
+    
+    public ExperimentStrategy getExperimentStrategy() {
+        return experimentStrategy;
+    }
+    
+    public void setExperimentStrategy(ExperimentStrategy experimentStrategy) {
+        this.experimentStrategy = experimentStrategy;
     }
 }

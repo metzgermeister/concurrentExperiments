@@ -4,13 +4,12 @@ import matrix.multiplication.task.MatrixMultiplyTask;
 import matrix.util.MatrixUtil;
 import org.apache.commons.lang3.Validate;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SquareMatrixBlockMultiplier extends SerialMultiplier {
     
-    //TODO pivanenko change to decomposition size
     private final int blockSize;
+    
     
     public SquareMatrixBlockMultiplier(int blockSize) {
         this.blockSize = blockSize;
@@ -27,7 +26,7 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
     public Integer[][] multiply(Integer[][] a, Integer[][] b) {
         validateSquare(a, b);
         Integer[][] result = new Integer[a.length][a.length];
-        List<MatrixMultiplyTask> tasks = generateMultiplyTasks(a, b, blockSize, 42);
+        List<MatrixMultiplyTask> tasks = TaskGenerator.generateMultiplyTasks(a, b, blockSize, 42);
         
         processTasks(tasks);
         
@@ -39,39 +38,12 @@ public class SquareMatrixBlockMultiplier extends SerialMultiplier {
         tasks.forEach(this::multiply);
     }
     
-        private void gatherResults(Integer[][] result, List<MatrixMultiplyTask> tasks) {
+    private void gatherResults(Integer[][] result, List<MatrixMultiplyTask> tasks) {
         for (MatrixMultiplyTask task : tasks) {
             MatrixUtil.copyBlockToMatrix(result, task.getIndex().getHorizontalBlockNum() * blockSize,
                     task.getIndex().getVerticalBlockNum() * blockSize,
                     task.getResult());
         }
-    }
-    
-    public List<MatrixMultiplyTask> generateMultiplyTasks(Integer[][] a, Integer[][] b, int blockSize, int 
-            clientNumber) {
-        int blocksInDimensionNum = a.length / blockSize;
-        
-        List<MatrixMultiplyTask> tasks = new ArrayList<>(blocksInDimensionNum * blocksInDimensionNum);
-        
-        
-        for (int i = 0; i < blocksInDimensionNum; i++) {
-            for (int j = 0; j < blocksInDimensionNum; j++) {
-                Integer[][] horizontalStripe = getHorizontalStripe(a, j);
-                Integer[][] verticalStripe = getVerticalStripe(b, i);
-                MatrixMultiplyTask task = new MatrixMultiplyTask(horizontalStripe, verticalStripe, i, j, clientNumber);
-                tasks.add(task);
-            }
-        }
-        return tasks;
-    }
-    
-    private Integer[][] getHorizontalStripe(Integer[][] matrix, int verticalBlockIndex) {
-        return MatrixUtil.getSubMatrix(matrix, 0, verticalBlockIndex * blockSize, matrix[0].length,
-                blockSize);
-    }
-    
-    private Integer[][] getVerticalStripe(Integer[][] matrix, int horizontalBlockIndex) {
-        return MatrixUtil.getSubMatrix(matrix, horizontalBlockIndex * blockSize, 0, blockSize, matrix.length);
     }
     
     

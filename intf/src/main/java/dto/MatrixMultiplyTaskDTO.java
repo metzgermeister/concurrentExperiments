@@ -7,18 +7,20 @@ public class MatrixMultiplyTaskDTO implements Serializable {
     private Integer[][] b;
     private int horizontalBlockNum;
     private int verticalBlockNum;
+    private ExperimentStrategy experimentStrategy;
     private int clientNumber;
     
     public MatrixMultiplyTaskDTO() {
     }
     
     public MatrixMultiplyTaskDTO(Integer[][] a, Integer[][] b, int horizontalBlockNum, int verticalBlockNum,
-                                 int clientNumber) {
+                                 int clientNumber, ExperimentStrategy experimentStrategy) {
         this.a = a;
         this.b = b;
         this.horizontalBlockNum = horizontalBlockNum;
         this.verticalBlockNum = verticalBlockNum;
         this.clientNumber = clientNumber;
+        this.experimentStrategy = experimentStrategy;
     }
     
     
@@ -57,5 +59,17 @@ public class MatrixMultiplyTaskDTO implements Serializable {
     
     public int getClientNumber() {
         return clientNumber;
+    }
+    
+    public ExperimentStrategy getExperimentStrategy() {
+        return experimentStrategy;
+    }
+    
+    public void setExperimentStrategy(ExperimentStrategy experimentStrategy) {
+        this.experimentStrategy = experimentStrategy;
+    }
+    
+    public void setClientNumber(int clientNumber) {
+        this.clientNumber = clientNumber;
     }
 }

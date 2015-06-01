@@ -1,7 +1,9 @@
 package matrix.service.controller;
 
+import dto.ExperimentStrategy;
 import dto.MatrixMultiplyResultDTO;
-import matrix.sheduler.ExperimentConductor;
+import matrix.scheduler.ExperimentConductor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -19,28 +21,54 @@ import javax.annotation.Resource;
 @RestController
 public class ExperimentController {
     
+    public static final String FINISHED_LOOK_AT_LOGS = "finished, look at logs";
     private static Logger logger = Logger.getLogger(ExperimentController.class);
     
     @Resource(name = "minMinConductor")
-    ExperimentConductor conductor;
-
+    ExperimentConductor minMinConductor;
     
-    @RequestMapping(value = "/twoClientsExperiment/{matrixDimension}", method = RequestMethod.GET)
-    public String twoClientsExperiment(@PathVariable("matrixDimension") Integer matrixDimension,
-                                       @RequestParam("firstClientBlockSize") Integer firstClientBlockSize,
-                                       @RequestParam("secondClientBlockSize") Integer secondClientBlockSize) {
-        Validate.notNull(firstClientBlockSize, "missing firstClientBlockSize parameter");
-        Validate.notNull(secondClientBlockSize, "missing secondClientBlockSize parameter");
-        conductor.conductExperiment(matrixDimension, firstClientBlockSize, secondClientBlockSize);
-        return "finished, look at logs";
+    
+    @Resource(name = "minMaxConductor")
+    ExperimentConductor minMaxConductor;
+    
+    
+    @RequestMapping(value = "/twoClientsExperiment/minMin/{matrixDimension}", method = RequestMethod.GET)
+    public String twoClientsMinMinExperiment(@PathVariable("matrixDimension") Integer matrixDimension,
+                                             @RequestParam("firstClientBlockSize") Integer firstClientBlockSize,
+                                             @RequestParam("secondClientBlockSize") Integer secondClientBlockSize) {
+        validateBlockSizes(firstClientBlockSize, secondClientBlockSize);
+        minMinConductor.conductExperiment(matrixDimension, firstClientBlockSize, secondClientBlockSize);
+        return FINISHED_LOOK_AT_LOGS;
     }
+    
+    @RequestMapping(value = "/twoClientsExperiment/minMax/{matrixDimension}", method = RequestMethod.GET)
+    public String twoClientsMinMaxExperiment(@PathVariable("matrixDimension") Integer matrixDimension,
+                                             @RequestParam("firstClientBlockSize") Integer firstClientBlockSize,
+                                             @RequestParam("secondClientBlockSize") Integer secondClientBlockSize) {
+        validateBlockSizes(firstClientBlockSize, secondClientBlockSize);
+        minMaxConductor.conductExperiment(matrixDimension, firstClientBlockSize, secondClientBlockSize);
+        return FINISHED_LOOK_AT_LOGS;
+    }
+    
     
     @RequestMapping(value = "/publishResult", method = RequestMethod.POST)
     @ResponseBody
     @ResponseStatus(HttpStatus.ACCEPTED)
     public String acceptResult(@RequestBody MatrixMultiplyResultDTO result) {
-        conductor.handleResult(result);
+        chooseConductor(result.getStrategy()).handleResult(result);
         return "Got it";
+    }
+    
+    private ExperimentConductor chooseConductor(ExperimentStrategy strategy) {
+        switch (strategy) {
+            case MINMIN:
+                return minMinConductor;
+            case MINMAX:
+                return minMaxConductor;
+            default:
+                throw new NotImplementedException("Strategy " + strategy + " not implemented yet");
+        }
+        
     }
     
     @RequestMapping(value = "/publishResultMock", method = RequestMethod.POST)
@@ -50,6 +78,11 @@ public class ExperimentController {
         logger.debug("scheduler service received result hor=" + result.getHorizontalBlockNum()
                 + " vert=" + result.getVerticalBlockNum());
         return "Got it";
+    }
+    
+    private void validateBlockSizes(@RequestParam("firstClientBlockSize") Integer firstClientBlockSize, @RequestParam("secondClientBlockSize") Integer secondClientBlockSize) {
+        Validate.notNull(firstClientBlockSize, "missing firstClientBlockSize parameter");
+        Validate.notNull(secondClientBlockSize, "missing secondClientBlockSize parameter");
     }
     
 }

@@ -1,8 +1,9 @@
-package matrix.sheduler;
+package matrix.scheduler;
 
 import concurrent.ObjectPool;
+import dto.ExperimentStrategy;
 import dto.MatrixMultiplyResultDTO;
-import matrix.multiplication.SquareMatrixBlockMultiplier;
+import matrix.multiplication.TaskGenerator;
 import matrix.multiplication.task.MatrixMultiplyTask;
 import matrix.multiplication.task.TaskIndex;
 import matrix.util.MatrixUtil;
@@ -31,6 +32,7 @@ public class ExperimentConductor {
     private final BasicTaskScheduler<MatrixMultiplyTask> scheduler;
     
     private final ObjectPool<Worker> workersPool;
+    private final ExperimentStrategy strategy;
     private final Random random = new Random();
     private final ConcurrentLinkedQueue<MatrixMultiplyResultDTO> results = new ConcurrentLinkedQueue<>();
     private final Map<TaskIndex, Worker> tasksAssignedToWorkers = new ConcurrentHashMap<>();
@@ -38,9 +40,11 @@ public class ExperimentConductor {
     private Executor sendersPool;
     private volatile CountDownLatch resultsLatch;
     
-    public ExperimentConductor(BasicTaskScheduler<MatrixMultiplyTask> scheduler, ObjectPool<Worker> workersPool) {
+    public ExperimentConductor(BasicTaskScheduler<MatrixMultiplyTask> scheduler, ObjectPool<Worker> workersPool,
+                               ExperimentStrategy strategy) {
         this.scheduler = scheduler;
         this.workersPool = workersPool;
+        this.strategy = strategy;
         this.workersPool.open();
     }
     
@@ -139,9 +143,7 @@ public class ExperimentConductor {
         MatrixUtil.randomize(a, random, 100);
         MatrixUtil.randomize(b, random, 100);
         
-        //TODO pivanenko  refactor SquareMatrixBlockMultiplier to split task generation and processing  
-        SquareMatrixBlockMultiplier multiplier = new SquareMatrixBlockMultiplier(squareSubBlockDimension);
-        return multiplier.generateMultiplyTasks(a, b, squareSubBlockDimension, clientNumber);
+        return TaskGenerator.generateMultiplyTasks(a, b, squareSubBlockDimension, clientNumber, strategy);
         
     }
     
@@ -184,6 +186,7 @@ public class ExperimentConductor {
     }
     
     
+    //TODO pivanenko introduce merger
     private Map<Integer, Integer[][]> mergeResults(Integer matrixDimension) {
         Map<Integer, Integer[][]> resultsByClientId = new HashMap<>();
         

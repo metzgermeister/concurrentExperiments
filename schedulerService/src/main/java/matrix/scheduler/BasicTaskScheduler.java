@@ -1,4 +1,4 @@
-package matrix.sheduler;
+package matrix.scheduler;
 
 
 import java.util.List;

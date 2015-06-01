@@ -1,4 +1,4 @@
-package matrix.sheduler.comparators;
+package matrix.scheduler.comparators;
 
 import scheduler.ComplexTask;
 
