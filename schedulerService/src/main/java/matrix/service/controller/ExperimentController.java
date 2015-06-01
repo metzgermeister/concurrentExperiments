@@ -31,6 +31,13 @@ public class ExperimentController {
     @Resource(name = "minMaxConductor")
     ExperimentConductor minMaxConductor;
     
+    @Resource(name = "maxMaxConductor")
+    ExperimentConductor maxMaxConductor;
+    
+    
+    @Resource(name = "maxMinConductor")
+    ExperimentConductor maxMinConductor;
+    
     
     @RequestMapping(value = "/twoClientsExperiment/minMin/{matrixDimension}", method = RequestMethod.GET)
     public String twoClientsMinMinExperiment(@PathVariable("matrixDimension") Integer matrixDimension,
@@ -50,6 +57,24 @@ public class ExperimentController {
         return FINISHED_LOOK_AT_LOGS;
     }
     
+    @RequestMapping(value = "/twoClientsExperiment/MaxMax/{matrixDimension}", method = RequestMethod.GET)
+    public String twoClientsMaxMaxExperiment(@PathVariable("matrixDimension") Integer matrixDimension,
+                                             @RequestParam("firstClientBlockSize") Integer firstClientBlockSize,
+                                             @RequestParam("secondClientBlockSize") Integer secondClientBlockSize) {
+        validateBlockSizes(firstClientBlockSize, secondClientBlockSize);
+        maxMaxConductor.conductExperiment(matrixDimension, firstClientBlockSize, secondClientBlockSize);
+        return FINISHED_LOOK_AT_LOGS;
+    }
+    
+    @RequestMapping(value = "/twoClientsExperiment/MaxMin/{matrixDimension}", method = RequestMethod.GET)
+    public String twoClientsMaxMinExperiment(@PathVariable("matrixDimension") Integer matrixDimension,
+                                             @RequestParam("firstClientBlockSize") Integer firstClientBlockSize,
+                                             @RequestParam("secondClientBlockSize") Integer secondClientBlockSize) {
+        validateBlockSizes(firstClientBlockSize, secondClientBlockSize);
+        maxMinConductor.conductExperiment(matrixDimension, firstClientBlockSize, secondClientBlockSize);
+        return FINISHED_LOOK_AT_LOGS;
+    }
+    
     
     @RequestMapping(value = "/publishResult", method = RequestMethod.POST)
     @ResponseBody
@@ -61,10 +86,14 @@ public class ExperimentController {
     
     private ExperimentConductor chooseConductor(ExperimentStrategy strategy) {
         switch (strategy) {
-            case MINMIN:
+            case MIN_MIN:
                 return minMinConductor;
-            case MINMAX:
+            case MIN_MAX:
                 return minMaxConductor;
+            case MAX_MAX:
+                return maxMaxConductor;
+            case MAX_MIN:
+                return maxMinConductor;
             default:
                 throw new NotImplementedException("Strategy " + strategy + " not implemented yet");
         }

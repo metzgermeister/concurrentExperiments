@@ -17,7 +17,7 @@ public final class TaskGenerator {
      */
     public static List<MatrixMultiplyTask> generateMultiplyTasks(Integer[][] a, Integer[][] b, int blockSize, int
             clientNumber) {
-        return generateMultiplyTasks(a, b, blockSize, clientNumber, ExperimentStrategy.MINMIN);
+        return generateMultiplyTasks(a, b, blockSize, clientNumber, ExperimentStrategy.MIN_MIN);
     }
     
     public static List<MatrixMultiplyTask> generateMultiplyTasks(Integer[][] a, Integer[][] b, int blockSize, int

@@ -17,25 +17,45 @@
     
     <bean name="minComplexityTaskScheduler4MinMin" class="matrix.scheduler.MinComplexityTaskScheduler"/>
     <bean name="minComplexityTaskScheduler4MinMax" class="matrix.scheduler.MinComplexityTaskScheduler"/>
+    <bean name="maxComplexityTaskScheduler4MaxMax" class="matrix.scheduler.MaxComplexityTaskScheduler"/>
+    <bean name="maxComplexityTaskScheduler4MaxMin" class="matrix.scheduler.MaxComplexityTaskScheduler"/>
     
-    <bean name="maxProductivityWorkersPool" class="concurrent.ConcurrentObjectPool">
+    <bean name="maxProductivityWorkersPool4MinMin" class="concurrent.ConcurrentObjectPool">
         <constructor-arg ref="maxProductivityWorkerComparator"/>
     </bean>
-    <bean name="minProductivityWorkersPool" class="concurrent.ConcurrentObjectPool">
+    <bean name="minProductivityWorkersPool4MinMax" class="concurrent.ConcurrentObjectPool">
         <constructor-arg ref="minProductivityWorkerComparator"/>
+    </bean>
+    <bean name="minProductivityWorkersPool4MaxMax" class="concurrent.ConcurrentObjectPool">
+        <constructor-arg ref="minProductivityWorkerComparator"/>
+    </bean>
+    <bean name="maxProductivityWorkersPool4MaxMin" class="concurrent.ConcurrentObjectPool">
+        <constructor-arg ref="maxProductivityWorkerComparator"/>
     </bean>
     
     
     <bean name="minMinConductor" class="matrix.scheduler.ExperimentConductor">
         <constructor-arg ref="minComplexityTaskScheduler4MinMin"/>
-        <constructor-arg ref="maxProductivityWorkersPool"/>
-        <constructor-arg value="MINMIN"/>
+        <constructor-arg ref="maxProductivityWorkersPool4MinMin"/>
+        <constructor-arg value="MIN_MIN"/>
     </bean>
     
     <bean name="minMaxConductor" class="matrix.scheduler.ExperimentConductor">
         <constructor-arg ref="minComplexityTaskScheduler4MinMax"/>
-        <constructor-arg ref="minProductivityWorkersPool"/>
-        <constructor-arg value="MINMAX"/>
+        <constructor-arg ref="minProductivityWorkersPool4MinMax"/>
+        <constructor-arg value="MIN_MAX"/>
+    </bean>
+    
+    <bean name="maxMaxConductor" class="matrix.scheduler.ExperimentConductor">
+        <constructor-arg ref="maxComplexityTaskScheduler4MaxMax"/>
+        <constructor-arg ref="minProductivityWorkersPool4MaxMax"/>
+        <constructor-arg value="MAX_MAX"/>
+    </bean>
+    
+    <bean name="maxMinConductor" class="matrix.scheduler.ExperimentConductor">
+        <constructor-arg ref="maxComplexityTaskScheduler4MaxMin"/>
+        <constructor-arg ref="maxProductivityWorkersPool4MaxMin"/>
+        <constructor-arg value="MAX_MIN"/>
     </bean>
 
 </beans>

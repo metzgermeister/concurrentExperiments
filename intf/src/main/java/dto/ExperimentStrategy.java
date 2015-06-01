@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum ExperimentStrategy {
-    MINMIN,
-    MINMAX,
-    MAXMIN,
-    MAXMAX;
+    MIN_MIN,
+    MIN_MAX,
+    MAX_MIN,
+    MAX_MAX;
     
     @JsonCreator
     public static ExperimentStrategy forValue(String value) {

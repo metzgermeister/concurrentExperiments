@@ -37,7 +37,7 @@ public class SerialMultiplierTest {
         
         int irrelevant = 42;
         
-        ExperimentStrategy irrelevantStrategy = ExperimentStrategy.MINMIN;
+        ExperimentStrategy irrelevantStrategy = ExperimentStrategy.MIN_MIN;
         MatrixMultiplyTask task = new MatrixMultiplyTask(A, B, irrelevant, irrelevant, irrelevant, irrelevantStrategy);
         serialMultiplier.multiply(task);
         Assert.assertTrue(task.isCalculated());
