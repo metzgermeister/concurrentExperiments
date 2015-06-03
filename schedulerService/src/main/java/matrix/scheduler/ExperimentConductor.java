@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import service.worker.Worker;
 
 import javax.annotation.PostConstruct;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,8 +107,11 @@ public class ExperimentConductor {
         
         long start = System.currentTimeMillis();
         
-        scheduler.submitAll(generateTasks(matrixDimension, firstClientBlockSize, 1));
-        scheduler.submitAll(generateTasks(matrixDimension, secondClientBlockSize, 2));
+        List<MatrixMultiplyTask> tasks = generateTasks(matrixDimension, firstClientBlockSize, 1);
+        tasks.addAll(generateTasks(matrixDimension, secondClientBlockSize, 2));
+        Collections.shuffle(tasks);
+        
+        scheduler.submitAll(tasks);
         long generated = System.currentTimeMillis();
         timingInfo.startMeasuring();
         startProcessing();
