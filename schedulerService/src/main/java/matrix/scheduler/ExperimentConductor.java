@@ -39,6 +39,7 @@ public class ExperimentConductor {
     
     private Executor sendersPool;
     private volatile CountDownLatch resultsLatch;
+    private final ExperimentTimingInfo timingInfo = new ExperimentTimingInfo();
     
     public ExperimentConductor(BasicTaskScheduler<MatrixMultiplyTask> scheduler, ObjectPool<Worker> workersPool,
                                ExperimentStrategy strategy) {
@@ -85,6 +86,7 @@ public class ExperimentConductor {
     
     public void handleResult(MatrixMultiplyResultDTO result) {
         TaskIndex index = new TaskIndex(result.getHorizontalBlockNum(), result.getVerticalBlockNum(), result.getClientNumber());
+        timingInfo.recordClientTime(result.getClientNumber(), System.currentTimeMillis());
         logger.debug("received result " + index + " for client number " + result.getClientNumber());
         Worker worker = tasksAssignedToWorkers.get(index);
         if (worker == null) {
@@ -107,7 +109,7 @@ public class ExperimentConductor {
         scheduler.submitAll(generateTasks(matrixDimension, firstClientBlockSize, 1));
         scheduler.submitAll(generateTasks(matrixDimension, secondClientBlockSize, 2));
         long generated = System.currentTimeMillis();
-        
+        timingInfo.startMeasuring();
         startProcessing();
         waitForResults();
         long processed = System.currentTimeMillis();
@@ -120,7 +122,8 @@ public class ExperimentConductor {
         logger.info("generated tasks in " + (generated - start) + experimentInfo);
         logger.info("processed tasks in " + (processed - generated) + experimentInfo);
         logger.info("merged results  in " + (finish - processed) + experimentInfo);
-        logger.info("total calculation time is " + (finish - generated) + experimentInfo);
+        logger.info("total calculation time is " + (finish - generated) + experimentInfo + " " + timingInfo
+                .getTimingInfo());
         logger.info("total time is " + (finish - start) + experimentInfo);
     }
     
